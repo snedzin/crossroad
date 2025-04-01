@@ -150,6 +150,228 @@
     a:hover {
       text-decoration: underline;
     }
+
+    /* New styles for create listing modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .modal-title {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid #4b5563;
+      background-color: #1e293b;
+      color: white;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Category badges */
+    .category-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .category-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .category-badge.goods {
+      background-color: #4f46e5;
+      color: white;
+    }
+    
+    .category-badge.services {
+      background-color: #8b5cf6;
+      color: white;
+    }
+    
+    .category-badge.housing {
+      background-color: #0ea5e9;
+      color: white;
+    }
+    
+    .category-badge.jobs {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .category-badge.community {
+      background-color: #f59e0b;
+      color: white;
+    }
+    
+    .category-badge.selected {
+      box-shadow: 0 0 0 2px white;
+      transform: scale(1.05);
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+    
+    .toast {
+      background-color: #4f46e5;
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      animation: slide-in 0.3s ease-out;
+      max-width: 300px;
+    }
+    
+    @keyframes slide-in {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slide-out {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    .toast.hiding {
+      animation: slide-out 0.3s ease-in forwards;
+    }
+
+    /* Filter controls */
+    .filter-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .search-box {
+      display: flex;
+      align-items: center;
+      background-color: #334155;
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+    
+    .search-box input {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      color: white;
+      outline: none;
+      width: 200px;
+    }
+    
+    .search-box button {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      color: white;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+      
+      .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-box {
+        width: 100%;
+      }
+      
+      .search-box input {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -158,74 +380,335 @@
       <h1>Peer Board Buzz</h1>
     </div>
     <div>
-      <button id="get-app-btn">Get Full App</button>
+      <button id="create-listing-btn">Create Listing</button>
     </div>
   </div>
   
   <div class="main">
-    <div class="message">
-      <h2>Welcome to Peer Board Buzz!</h2>
-      <p>This is a simplified standalone version. For the full peer-to-peer experience with real-time listings and deals, you need to run the complete web application.</p>
-      <div class="links">
-        <a href="https://github.com/your-username/peer-board-buzz" target="_blank">View on GitHub</a>
-        <a href="https://peer-board-buzz.lovable.app" target="_blank">Visit Web Version</a>
+    <div class="filter-controls">
+      <div class="category-selector" id="filter-categories">
+        <div class="category-badge all selected" data-category="all">All</div>
+        <div class="category-badge goods" data-category="goods">Goods</div>
+        <div class="category-badge services" data-category="services">Services</div>
+        <div class="category-badge housing" data-category="housing">Housing</div>
+        <div class="category-badge jobs" data-category="jobs">Jobs</div>
+        <div class="category-badge community" data-category="community">Community</div>
+      </div>
+      
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search listings...">
+        <button id="search-button">🔍</button>
       </div>
     </div>
     
-    <div class="board">
-      <!-- Sample listings -->
-      <div class="card">
-        <div class="card-img">No Image</div>
-        <div class="card-content">
-          <div class="badge">Goods</div>
-          <h3>Vintage Record Player</h3>
-          <p>Excellent condition vintage record player from the 70s. Perfect for vinyl enthusiasts.</p>
-          <div class="card-footer">
-            <span class="price">$120</span>
-            <span class="time">2 days ago</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-img">No Image</div>
-        <div class="card-content">
-          <div class="badge" style="background-color: #8b5cf6;">Services</div>
-          <h3>Web Development</h3>
-          <p>Professional web development services. Modern, responsive designs with the latest technologies.</p>
-          <div class="card-footer">
-            <span class="price">$50/hr</span>
-            <span class="time">3 hours ago</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-img">No Image</div>
-        <div class="card-content">
-          <div class="badge" style="background-color: #0ea5e9;">Housing</div>
-          <h3>Room for Rent</h3>
-          <p>Spacious room available in a shared apartment. All utilities included, close to public transport.</p>
-          <div class="card-footer">
-            <span class="price">$600/month</span>
-            <span class="time">1 day ago</span>
-          </div>
-        </div>
-      </div>
+    <div class="board" id="listing-board">
+      <!-- Sample listings will be added by JS -->
     </div>
   </div>
+
+  <!-- Create Listing Modal -->
+  <div class="modal" id="create-listing-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Create New Listing</h2>
+        <button class="close-button" id="close-modal-btn">&times;</button>
+      </div>
+      <form id="listing-form">
+        <div class="form-group">
+          <label for="listing-title">Title</label>
+          <input type="text" id="listing-title" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-category">Category</label>
+          <div class="category-selector" id="select-categories">
+            <div class="category-badge goods" data-category="goods">Goods</div>
+            <div class="category-badge services" data-category="services">Services</div>
+            <div class="category-badge housing" data-category="housing">Housing</div>
+            <div class="category-badge jobs" data-category="jobs">Jobs</div>
+            <div class="category-badge community" data-category="community">Community</div>
+          </div>
+          <input type="hidden" id="selected-category" value="goods">
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-description">Description</label>
+          <textarea id="listing-description" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-price">Price</label>
+          <input type="text" id="listing-price" placeholder="$0.00" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-contact">Contact Information</label>
+          <input type="text" id="listing-contact" placeholder="Email or phone number">
+        </div>
+        
+        <button type="submit" id="submit-listing-btn">Create Listing</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
   
   <script>
-    document.getElementById('get-app-btn').addEventListener('click', function() {
-      alert('To use the full application, you need to:\n\n1. Clone from GitHub\n2. Run "npm install"\n3. Run "npm run dev"\n\nOr visit the hosted web version.');
+    // Sample data to populate the board
+    const sampleListings = [
+      {
+        id: 1,
+        title: "Vintage Record Player",
+        description: "Excellent condition vintage record player from the 70s. Perfect for vinyl enthusiasts.",
+        price: "$120",
+        category: "goods",
+        time: "2 days ago"
+      },
+      {
+        id: 2,
+        title: "Web Development",
+        description: "Professional web development services. Modern, responsive designs with the latest technologies.",
+        price: "$50/hr",
+        category: "services",
+        time: "3 hours ago"
+      },
+      {
+        id: 3,
+        title: "Room for Rent",
+        description: "Spacious room available in a shared apartment. All utilities included, close to public transport.",
+        price: "$600/month",
+        category: "housing",
+        time: "1 day ago"
+      },
+      {
+        id: 4,
+        title: "Part-time Marketing Assistant",
+        description: "Looking for a marketing assistant for a local business. 20 hours per week, flexible schedule.",
+        price: "$20/hr",
+        category: "jobs",
+        time: "5 hours ago"
+      },
+      {
+        id: 5,
+        title: "Community Garden Volunteers",
+        description: "Join our community garden project! We need volunteers for Saturday mornings.",
+        price: "Volunteer",
+        category: "community",
+        time: "12 hours ago"
+      }
+    ];
+    
+    // Data storage using localStorage
+    function initializeLocalStorage() {
+      if (!localStorage.getItem('peerBoardListings')) {
+        localStorage.setItem('peerBoardListings', JSON.stringify(sampleListings));
+      }
+    }
+    
+    function getListings() {
+      return JSON.parse(localStorage.getItem('peerBoardListings') || '[]');
+    }
+    
+    function saveListing(listing) {
+      const listings = getListings();
+      listing.id = Date.now(); // Simple unique ID
+      listing.time = 'Just now';
+      listings.push(listing);
+      localStorage.setItem('peerBoardListings', JSON.stringify(listings));
+      return listing;
+    }
+    
+    // DOM elements
+    const listingBoard = document.getElementById('listing-board');
+    const createListingBtn = document.getElementById('create-listing-btn');
+    const createListingModal = document.getElementById('create-listing-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const listingForm = document.getElementById('listing-form');
+    const filterCategories = document.getElementById('filter-categories');
+    const selectCategories = document.getElementById('select-categories');
+    const selectedCategoryInput = document.getElementById('selected-category');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    
+    // Initialize localStorage
+    initializeLocalStorage();
+    
+    // Render all listings
+    function renderListings(filter = 'all', searchQuery = '') {
+      listingBoard.innerHTML = '';
+      const listings = getListings();
+      
+      const filteredListings = listings.filter(listing => {
+        const matchesCategory = filter === 'all' || listing.category === filter;
+        const matchesSearch = !searchQuery || 
+          listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          listing.description.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+      
+      if (filteredListings.length === 0) {
+        listingBoard.innerHTML = `
+          <div class="message" style="grid-column: 1 / -1;">
+            <h2>No listings found</h2>
+            <p>Try adjusting your filters or create a new listing.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredListings.forEach(listing => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-img">No Image</div>
+          <div class="card-content">
+            <div class="badge" style="${getCategoryStyle(listing.category)}">${capitalizeFirstLetter(listing.category)}</div>
+            <h3>${listing.title}</h3>
+            <p>${listing.description}</p>
+            <div class="card-footer">
+              <span class="price">${listing.price}</span>
+              <span class="time">${listing.time}</span>
+            </div>
+          </div>
+        `;
+        
+        card.addEventListener('click', () => {
+          showToast(`Contact for "${listing.title}": ${listing.contact || 'No contact info provided'}`);
+        });
+        
+        listingBoard.appendChild(card);
+      });
+    }
+    
+    function getCategoryStyle(category) {
+      switch(category) {
+        case 'goods': return 'background-color: #4f46e5;';
+        case 'services': return 'background-color: #8b5cf6;';
+        case 'housing': return 'background-color: #0ea5e9;';
+        case 'jobs': return 'background-color: #10b981;';
+        case 'community': return 'background-color: #f59e0b;';
+        default: return '';
+      }
+    }
+    
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    
+    // Modal handling
+    createListingBtn.addEventListener('click', () => {
+      createListingModal.classList.add('active');
     });
     
-    // Make cards interactive
-    document.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', () => {
-        alert('This is a demo version. Please use the full application to interact with listings.');
-      });
+    closeModalBtn.addEventListener('click', () => {
+      createListingModal.classList.remove('active');
     });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target === createListingModal) {
+        createListingModal.classList.remove('active');
+      }
+    });
+    
+    // Category selection in create form
+    selectCategories.addEventListener('click', (e) => {
+      if (e.target.classList.contains('category-badge')) {
+        // Remove selected class from all badges
+        selectCategories.querySelectorAll('.category-badge').forEach(badge => {
+          badge.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked badge
+        e.target.classList.add('selected');
+        
+        // Update hidden input
+        selectedCategoryInput.value = e.target.dataset.category;
+      }
+    });
+    
+    // Filter by category
+    filterCategories.addEventListener('click', (e) => {
+      if (e.target.classList.contains('category-badge')) {
+        // Remove selected class from all badges
+        filterCategories.querySelectorAll('.category-badge').forEach(badge => {
+          badge.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked badge
+        e.target.classList.add('selected');
+        
+        // Apply filter
+        renderListings(e.target.dataset.category, searchInput.value);
+      }
+    });
+    
+    // Search functionality
+    searchButton.addEventListener('click', () => {
+      const activeFilter = filterCategories.querySelector('.selected').dataset.category;
+      renderListings(activeFilter, searchInput.value);
+    });
+    
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const activeFilter = filterCategories.querySelector('.selected').dataset.category;
+        renderListings(activeFilter, searchInput.value);
+      }
+    });
+    
+    // Form submission
+    listingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const newListing = {
+        title: document.getElementById('listing-title').value,
+        description: document.getElementById('listing-description').value,
+        price: document.getElementById('listing-price').value,
+        category: selectedCategoryInput.value,
+        contact: document.getElementById('listing-contact').value
+      };
+      
+      saveListing(newListing);
+      
+      // Reset form and close modal
+      listingForm.reset();
+      createListingModal.classList.remove('active');
+      
+      // Rerender with current filters
+      const activeFilter = filterCategories.querySelector('.selected').dataset.category;
+      renderListings(activeFilter, searchInput.value);
+      
+      showToast('Your listing has been created!');
+    });
+    
+    // Toast notifications
+    function showToast(message) {
+      const toastContainer = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      
+      toastContainer.appendChild(toast);
+      
+      // Remove toast after 3 seconds
+      setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => {
+          toastContainer.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+    
+    // Initialize the board
+    renderListings();
+    
+    // Auto-select the first category in the creation form
+    const firstCategoryBadge = selectCategories.querySelector('.category-badge');
+    if (firstCategoryBadge) {
+      firstCategoryBadge.classList.add('selected');
+      selectedCategoryInput.value = firstCategoryBadge.dataset.category;
+    }
   </script>
 </body>
 </html>

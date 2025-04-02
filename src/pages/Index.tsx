@@ -37,7 +37,7 @@ const Index = () => {
           toast({
             title: "P2P Connection Warning",
             description: "Peer-to-peer functionality may be limited. You can still use the application locally.",
-            variant: "warning",
+            variant: "default", // Changed from "warning" to "default"
           });
         }
       } catch (error) {

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -554,6 +553,7 @@
       </div>
       
       <div class="p2p-tab-content active" id="listings-tab">
+        <!-- Listings will be added here by JS -->
         <div class="filter-controls">
           <div class="category-selector" id="filter-categories">
             <div class="category-badge all selected" data-category="all">All</div>
@@ -683,8 +683,19 @@
             // Generate a new peer ID
             this.peerId = `p2p-board-${this.generateId()}`;
             
-            // Create a new Peer instance
-            this.peer = new Peer(this.peerId);
+            // Create a new Peer instance - Fix: Use a configuration with reliable ICE servers
+            this.peer = new Peer(this.peerId, {
+              debug: 2, // Enable more verbose debugging
+              config: {
+                'iceServers': [
+                  { urls: 'stun:stun.l.google.com:19302' },
+                  { urls: 'stun:stun1.l.google.com:19302' },
+                  { urls: 'stun:stun2.l.google.com:19302' },
+                  { urls: 'stun:stun3.l.google.com:19302' },
+                  { urls: 'stun:stun4.l.google.com:19302' }
+                ]
+              }
+            });
             
             // Handle connection events
             this.peer.on('open', (id) => {
@@ -709,6 +720,7 @@
         if (!this.peer) return;
         
         this.peer.on('connection', (conn) => {
+          console.log("Received connection attempt from:", conn.peer);
           this.handleConnection(conn);
         });
         
@@ -724,13 +736,21 @@
         // Store the connection
         this.connections.set(conn.peer, conn);
         
-        // Notify callback if exists
-        if (this.onPeerConnected) {
-          this.onPeerConnected(conn.peer);
-        }
-        
         // Set up message handling
+        conn.on('open', () => {
+          console.log("Connection opened with:", conn.peer);
+          
+          // Notify callback if exists
+          if (this.onPeerConnected) {
+            this.onPeerConnected(conn.peer);
+          }
+          
+          // Send a hello message
+          this.sendHello(conn.peer);
+        });
+        
         conn.on('data', (data) => {
+          console.log("Received data from:", conn.peer, data);
           this.handleMessage(data, conn);
         });
         
@@ -746,29 +766,34 @@
         conn.on('error', (err) => {
           console.error('Connection error:', conn.peer, err);
         });
-        
-        // Send a hello message
-        this.sendHello(conn.peer);
       }
       
       // Connect to another peer
       connectToPeer(peerId) {
         return new Promise((resolve) => {
           if (!this.peer || peerId === this.peerId) {
+            console.log("Cannot connect: Invalid peer conditions");
             resolve(false);
             return;
           }
           
           // Check if already connected
           if (this.connections.has(peerId)) {
+            console.log("Already connected to:", peerId);
             resolve(true);
             return;
           }
           
           try {
-            const conn = this.peer.connect(peerId, { reliable: true });
+            console.log("Attempting to connect to:", peerId);
+            const conn = this.peer.connect(peerId, { 
+              reliable: true,
+              serialization: 'json',
+              metadata: { sender: this.peerId }
+            });
             
             conn.on('open', () => {
+              console.log("Successfully opened connection to:", peerId);
               this.handleConnection(conn);
               resolve(true);
             });
@@ -781,9 +806,10 @@
             // Set a timeout in case connection never opens
             setTimeout(() => {
               if (!this.connections.has(peerId)) {
+                console.log("Connection timeout for:", peerId);
                 resolve(false);
               }
-            }, 10000);
+            }, 15000); // Increased timeout to 15 seconds
           } catch (error) {
             console.error('Failed to connect:', error);
             resolve(false);
@@ -804,14 +830,17 @@
       sendToPeer(peerId, message) {
         const conn = this.connections.get(peerId);
         if (conn) {
+          console.log("Sending message to:", peerId, message);
           conn.send(message);
           return true;
         }
+        console.log("Failed to send - no connection to:", peerId);
         return false;
       }
       
       // Broadcast a message to all connected peers
       broadcast(message) {
+        console.log("Broadcasting message to all peers:", message);
         this.connections.forEach((conn) => {
           conn.send(message);
         });
@@ -819,11 +848,11 @@
       
       // Handle incoming messages
       handleMessage(message, connection) {
-        console.log('Received message:', message.type);
+        console.log('Received message:', message.type, "from:", connection.peer);
         
         switch (message.type) {
           case 'HELLO':
-            this.handleHelloMessage(message);
+            this.handleHelloMessage(message, connection);
             break;
           case 'LISTING_BROADCAST':
             if (this.onListingReceived) {
@@ -834,9 +863,10 @@
       }
       
       // Handle hello messages
-      handleHelloMessage(message) {
-        // Simply acknowledge for now
+      handleHelloMessage(message, connection) {
+        // Reply with hello
         console.log('Received hello from:', message.senderId);
+        this.sendHello(connection.peer);
       }
       
       // Send hello to a peer
@@ -848,6 +878,7 @@
           messageId: this.generateId(),
         };
         
+        console.log("Sending hello to:", peerId);
         return this.sendToPeer(peerId, message);
       }
       
@@ -1103,6 +1134,7 @@
           connectButton.disabled = true;
           connectButton.textContent = 'Connecting...';
           
+          console.log("Initiating connection to:", peerId);
           const success = await p2pService.connectToPeer(peerId);
           
           if (success) {
@@ -1115,6 +1147,13 @@
           connectButton.disabled = false;
           connectButton.textContent = 'Connect to Peer';
           updatePeerList();
+        }
+      });
+      
+      // Enter key in peer ID input should trigger connect button
+      peerIdInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !connectButton.disabled) {
+          connectButton.click();
         }
       });
       

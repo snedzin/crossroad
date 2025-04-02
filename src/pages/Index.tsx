@@ -19,6 +19,7 @@ const Index = () => {
 
   const { loadAllListings } = useListingStore();
   const { loadUserProfile } = useUserStore();
+  const { initializePeer } = usePeerStore();
   
   // Initialize the database and load data
   useEffect(() => {
@@ -27,6 +28,18 @@ const Index = () => {
         await initializeDatabase();
         await loadAllListings();
         await loadUserProfile();
+        
+        // Initialize peer connection
+        try {
+          await initializePeer();
+        } catch (peerError) {
+          console.warn("Peer initialization failed, will continue with limited functionality:", peerError);
+          toast({
+            title: "P2P Connection Warning",
+            description: "Peer-to-peer functionality may be limited. You can still use the application locally.",
+            variant: "warning",
+          });
+        }
       } catch (error) {
         console.error("Failed to initialize database:", error);
         setInitError("Failed to initialize the application. If you're opening this file directly from your computer, please try using a web server instead.");
@@ -39,7 +52,7 @@ const Index = () => {
     };
     
     initialize();
-  }, [loadAllListings, loadUserProfile, toast]);
+  }, [loadAllListings, loadUserProfile, toast, initializePeer]);
 
   // Display helpful message if there's an initialization error
   if (initError) {

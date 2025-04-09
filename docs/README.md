@@ -14,7 +14,7 @@ This documentation provides a comprehensive overview of the P2P Bulletin Board s
 
 To run the standalone application:
 
-1. Simply open the `public/standalone.html` file in your browser
+1. Simply open the `public/index.html` file in your browser
 2. Alternatively, serve it via any web server:
 
 ```bash
@@ -28,4 +28,3 @@ npx serve
 ## Important Note
 
 This application uses PeerJS for peer-to-peer communication. For the best experience, always run the application through a web server rather than directly from the file system.
-

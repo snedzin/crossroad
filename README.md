@@ -1,73 +1,59 @@
-# Welcome to your Lovable project
 
-## Project info
+# P2P Bulletin Board
 
-**URL**: https://lovable.dev/projects/52dacd4c-fee9-42c1-9627-0b73cc289534
+A decentralized peer-to-peer bulletin board system that works directly in your browser with no server required.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Create and view listings without a central server
+- Connect with peers to share and discover content
+- Store data locally in your browser
+- Search and filter listings by category
+- Works offline
 
-**Use Lovable**
+## Quick Start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/52dacd4c-fee9-42c1-9627-0b73cc289534) and start prompting.
+1. **Open the Application**:
+   - Simply open `public/index.html` in your browser, or
+   - Serve it through any web server
 
-Changes made via Lovable will be committed automatically to this repo.
+2. **For Mobile Devices**:
+   - Use `public/mobile.html` for a mobile-optimized experience
 
-**Use your preferred IDE**
+## How It Works
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+This application uses:
+- PeerJS for WebRTC peer-to-peer connections
+- LocalStorage for persistent data storage
+- No frameworks, no build steps - just vanilla HTML, CSS, and JavaScript
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Documentation
 
-Follow these steps:
+For more detailed information, see the [documentation](docs/README.md).
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Deployment
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### GitHub Pages
 
-# Step 3: Install the necessary dependencies.
-npm i
+This repository is set up to automatically deploy to GitHub Pages when changes are pushed to the main branch.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Other Hosting Options
+
+The application can be hosted on any static file hosting service. Just upload the files from the `public` directory.
+
+## License
+
+MIT
+
+## Project Structure
+
+The essential files for this project are:
+
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/52dacd4c-fee9-42c1-9627-0b73cc289534) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+/
+├── .github/workflows/  # GitHub Actions for deployment
+├── docs/               # Documentation
+└── public/             # Application files
+    ├── index.html      # Main application
+    └── mobile.html     # Mobile-optimized version
+```

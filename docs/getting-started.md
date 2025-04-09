@@ -12,7 +12,7 @@
 
 The simplest way to run the application is to open the HTML file directly:
 
-1. Download the `standalone.html` file from the `/public` directory
+1. Download the `index.html` file from the `/public` directory
 2. Open the file in your web browser
 
 ### Serving Locally
@@ -27,9 +27,9 @@ python -m http.server
 npx serve
 
 # Then visit:
-# http://localhost:8000/standalone.html (Python)
+# http://localhost:8000/index.html (Python)
 # OR
-# http://localhost:3000/standalone.html (serve)
+# http://localhost:3000/index.html (serve)
 ```
 
 ### Mobile Usage
@@ -48,7 +48,7 @@ The application can be easily hosted on GitHub Pages:
 1. Fork or clone this repository
 2. Enable GitHub Pages in your repository settings
 3. Set the source to the main branch and the root directory
-4. Your application will be available at `https://yourusername.github.io/p2p-bulletin-board/public/standalone.html`
+4. Your application will be available at `https://yourusername.github.io/p2p-bulletin-board/`
 
 ### Other Static Hosting Options
 
@@ -69,4 +69,3 @@ Simply upload the files from the `/public` directory to your hosting service.
 3. **Share Your Peer ID**: Copy your peer ID and share it with others to connect
 4. **Filter Listings**: Use the category filters to find specific types of listings
 5. **Search**: Use the search box to find listings by keyword
-

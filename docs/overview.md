@@ -23,7 +23,7 @@ Unlike traditional bulletin board systems that rely on a central server, this ap
 
 ## Application Flow
 
-1. User opens the standalone HTML file in a browser
+1. User opens the HTML file in a browser
 2. Listings are loaded from local storage
 3. (Optional) User can connect to peers to share and discover listings
 4. User can create, view, and interact with listings
@@ -36,4 +36,3 @@ Unlike traditional bulletin board systems that rely on a central server, this ap
 - **Responsive**: Works on various device sizes
 - **Standalone**: No build process or framework dependencies
 - **Self-Contained**: Everything needed is in a single HTML file
-

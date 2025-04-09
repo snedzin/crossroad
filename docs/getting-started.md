@@ -3,100 +3,70 @@
 
 ## Prerequisites
 
-- Node.js 16.x or higher
-- npm 7.x or higher
 - Modern web browser (Chrome, Firefox, Edge, Safari)
+- That's it! No other software required
 
-## Installation
+## Running the Application
 
-1. Clone the repository:
+### Local Usage
 
-```bash
-git clone https://github.com/your-username/p2p-bulletin-board.git
-cd p2p-bulletin-board
-```
+The simplest way to run the application is to open the HTML file directly:
 
-2. Install dependencies:
+1. Download the `standalone.html` file from the `/public` directory
+2. Open the file in your web browser
 
-```bash
-npm install
-```
+### Serving Locally
 
-3. Start the development server:
+For better performance and to avoid any browser security restrictions, you can serve the file using any web server:
 
 ```bash
-npm run dev
+# Using Python (if you have Python installed)
+python -m http.server
+
+# OR using NPX serve (if you have Node.js installed)
+npx serve
+
+# Then visit:
+# http://localhost:8000/standalone.html (Python)
+# OR
+# http://localhost:3000/standalone.html (serve)
 ```
 
-4. Open the application in your browser:
+### Mobile Usage
 
-```
-http://localhost:5173
-```
+For mobile devices, use the `mobile.html` file which is optimized for smaller screens:
 
-## Building for Production
-
-1. Create a production build:
-
-```bash
-npm run build
-```
-
-2. Preview the production build:
-
-```bash
-npm run preview
-```
+1. Download the `mobile.html` file from the `/public` directory
+2. Open it in your mobile browser or serve it using the methods above
 
 ## Deployment Options
 
-### Static Site Hosting
+### Hosting on GitHub Pages
 
-The application can be deployed to any static site hosting service:
+The application can be easily hosted on GitHub Pages:
 
-- GitHub Pages
+1. Fork or clone this repository
+2. Enable GitHub Pages in your repository settings
+3. Set the source to the main branch and the root directory
+4. Your application will be available at `https://yourusername.github.io/p2p-bulletin-board/public/standalone.html`
+
+### Other Static Hosting Options
+
+Any static hosting service will work:
+
 - Netlify
 - Vercel
 - Firebase Hosting
+- Amazon S3
+- Any web hosting service that can serve static files
 
-Example GitHub Pages deployment:
+Simply upload the files from the `/public` directory to your hosting service.
 
-```bash
-# Install gh-pages
-npm install --save-dev gh-pages
+## Using the Application
 
-# Add deploy script to package.json
-# "deploy": "gh-pages -d dist"
+1. **Create Listings**: Click the "Create Listing" button to add new items
+2. **Connect to Peers**: Go to the "Connections" tab to connect with other users
+3. **Share Your Peer ID**: Copy your peer ID and share it with others to connect
+4. **Filter Listings**: Use the category filters to find specific types of listings
+5. **Search**: Use the search box to find listings by keyword
 
-# Build and deploy
-npm run build
-npm run deploy
-```
-
-### Local Deployment
-
-For local networks, you can use any simple HTTP server:
-
-```bash
-# Using Python
-python -m http.server -d dist
-
-# Using npm serve package
-npx serve dist
-```
-
-## Configuration
-
-No server-side configuration is required since the application uses:
-
-- Browser IndexedDB for storage
-- WebRTC for peer-to-peer communication
-- PeerJS servers for connection brokering only
-
-## Development Workflow
-
-1. Make changes to the code
-2. Run the development server (`npm run dev`)
-3. Test changes in the browser
-4. Build for production (`npm run build`)
-5. Deploy to your hosting platform of choice

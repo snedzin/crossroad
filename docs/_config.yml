@@ -1,23 +1,17 @@
 
 # GitHub Pages configuration
 title: P2P Bulletin Board Documentation
-description: Documentation for the P2P Bulletin Board application
+description: Documentation for the P2P Bulletin Board standalone application
 theme: jekyll-theme-cayman
 
 # Navigation
 nav:
   - title: Project Overview
     url: overview.html
-  - title: Project Structure
-    url: structure.html
   - title: Features
     url: features.html
   - title: Peer-to-Peer Communication
     url: p2p.html
-  - title: Data Models
-    url: models.html
-  - title: User Interface
-    url: ui.html
   - title: Getting Started
     url: getting-started.html
 
@@ -25,3 +19,4 @@ nav:
 github:
   is_project_page: true
   repository_url: https://github.com/your-username/p2p-bulletin-board
+

@@ -4,9 +4,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ListingBoard from "@/components/ListingBoard";
 import CreateListingDialog from "@/components/CreateListingDialog";
-import PeerManager from "@/components/PeerManager";
 import { useToast } from "@/components/ui/use-toast";
-import { usePeerStore } from "@/stores/peerStore";
 import { useListingStore } from "@/stores/listingStore";
 import { useUserStore } from "@/stores/userStore";
 import { initializeDatabase } from "@/lib/db";
@@ -19,7 +17,6 @@ const Index = () => {
 
   const { loadAllListings } = useListingStore();
   const { loadUserProfile } = useUserStore();
-  const { initializePeer } = usePeerStore();
   
   // Initialize the database and load data
   useEffect(() => {
@@ -28,18 +25,6 @@ const Index = () => {
         await initializeDatabase();
         await loadAllListings();
         await loadUserProfile();
-        
-        // Initialize peer connection
-        try {
-          await initializePeer();
-        } catch (peerError) {
-          console.warn("Peer initialization failed, will continue with limited functionality:", peerError);
-          toast({
-            title: "P2P Connection Warning",
-            description: "Peer-to-peer functionality may be limited. You can still use the application locally.",
-            variant: "default", // Changed from "warning" to "default"
-          });
-        }
       } catch (error) {
         console.error("Failed to initialize database:", error);
         setInitError("Failed to initialize the application. If you're opening this file directly from your computer, please try using a web server instead.");
@@ -52,7 +37,7 @@ const Index = () => {
     };
     
     initialize();
-  }, [loadAllListings, loadUserProfile, toast, initializePeer]);
+  }, [loadAllListings, loadUserProfile, toast]);
 
   // Display helpful message if there's an initialization error
   if (initError) {
@@ -96,9 +81,6 @@ const Index = () => {
         open={createDialogOpen} 
         onOpenChange={setCreateDialogOpen} 
       />
-
-      {/* Hidden component that manages P2P connections */}
-      <PeerManager />
     </div>
   );
 };

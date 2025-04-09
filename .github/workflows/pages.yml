@@ -27,6 +27,8 @@ jobs:
         run: |
           mkdir -p _site
           cp -r public/* _site/
+          # Copy standalone.html to index.html for the root URL
+          cp public/standalone.html _site/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
 

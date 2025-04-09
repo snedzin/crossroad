@@ -1,0 +1,1493 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crossroad - P2P Deals</title>
+  <!-- Include PeerJS directly -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <!-- Add a retro font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Special+Elite&display=swap">
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #121212;
+      --bg-tertiary: #1a1a1a;
+      --text-primary: #e0e0e0;
+      --text-secondary: #a0a0a0;
+      --text-muted: #707070;
+      --accent-primary: #b30000;
+      --accent-secondary: #ff3333;
+      --accent-tertiary: #ff6666;
+      --border-color: #333333;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+      --retro-glow: 0 0 5px rgba(255, 0, 0, 0.7);
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.95; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    
+    @keyframes redGlow {
+      0%, 100% { text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+      50% { text-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
+    }
+    
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Special Elite', monospace;
+      line-height: 1.6;
+      background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23222222' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H5V0zm1 5v1H5v-1H0V0h1v5h5z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    /* Layout */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 1px 10px var(--shadow-color);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .logo h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.25rem;
+      animation: redGlow 4s infinite;
+    }
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      fill: var(--accent-primary);
+    }
+    
+    .main {
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    /* Board UI */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .card {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-radius: 0.25rem;
+      overflow: hidden;
+      box-shadow: 0 4px 8px var(--shadow-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px var(--shadow-color), 0 0 5px var(--accent-tertiary);
+    }
+    
+    .card-img {
+      height: 150px;
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .card-content {
+      padding: 1rem;
+    }
+    
+    .card-content h3 {
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .card-content p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin: 0.5rem 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border-color);
+    }
+    
+    .price {
+      font-weight: 600;
+      color: var(--accent-secondary);
+    }
+    
+    .time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      border-radius: 3px;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+    
+    /* Filter controls */
+    .filter-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 0.75rem;
+      padding: 1rem;
+      background-color: var(--bg-secondary);
+      border-radius: 0.25rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .category-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .category-badge {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background-color: var(--bg-tertiary);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0.7;
+      border: 1px solid var(--border-color);
+    }
+    
+    .category-badge.selected {
+      opacity: 1;
+      transform: scale(1.05);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 5px var(--accent-tertiary);
+    }
+    
+    .category-badge.all {
+      background-color: var(--bg-tertiary);
+    }
+    
+    .category-badge.goods {
+      background-color: var(--bg-tertiary);
+      border-left: 3px solid #ff3333;
+    }
+    
+    .category-badge.services {
+      background-color: var(--bg-tertiary);
+      border-left: 3px solid #9933ff;
+    }
+    
+    .category-badge.housing {
+      background-color: var(--bg-tertiary);
+      border-left: 3px solid #3399ff;
+    }
+    
+    .category-badge.jobs {
+      background-color: var(--bg-tertiary);
+      border-left: 3px solid #33cc66;
+    }
+    
+    .category-badge.community {
+      background-color: var(--bg-tertiary);
+      border-left: 3px solid #ff9933;
+    }
+    
+    .search-box {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      max-width: 400px;
+    }
+    
+    .search-box input {
+      padding: 0.5rem 0.75rem;
+      border-radius: 3px 0 0 3px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      outline: none;
+      width: 100%;
+      font-family: inherit;
+    }
+    
+    .search-box input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .search-box button {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0 3px 3px 0;
+      border: 1px solid var(--border-color);
+      border-left: none;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    
+    /* Buttons */
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 3px;
+      border: 1px solid var(--border-color);
+      background-color: var(--accent-primary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      font-family: inherit;
+    }
+    
+    button:hover {
+      background-color: var(--accent-secondary);
+    }
+    
+    button:disabled {
+      background-color: var(--bg-tertiary);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background-color: var(--bg-secondary);
+      border-radius: 0.25rem;
+      border: 1px solid var(--border-color);
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px var(--shadow-color), 0 0 10px var(--accent-tertiary);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--accent-secondary);
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      color: var(--text-primary);
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 3px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      outline: none;
+      font-family: inherit;
+    }
+    
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    form {
+      padding: 1rem;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .toast {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      padding: 0.75rem 1rem;
+      border-radius: 3px;
+      border-left: 4px solid var(--accent-primary);
+      box-shadow: 0 4px 6px var(--shadow-color);
+      animation: slideIn 0.3s ease-in-out;
+      max-width: 300px;
+    }
+    
+    .toast.hiding {
+      animation: slideOut 0.3s ease-in-out forwards;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    /* Message */
+    .message {
+      text-align: center;
+      padding: 2rem;
+      background-color: var(--bg-secondary);
+      border-radius: 0.25rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .message h2 {
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      color: var(--accent-secondary);
+    }
+    
+    .message p {
+      color: var(--text-secondary);
+    }
+    
+    /* Additional styles for P2P functionality */
+    .peer-status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: var(--bg-secondary);
+      border-radius: 0.25rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .status-indicator {
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+    
+    .status-connected {
+      background-color: var(--accent-secondary);
+      box-shadow: 0 0 10px var(--accent-tertiary);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-disconnected {
+      background-color: #333333;
+    }
+    
+    .peer-id {
+      font-family: monospace;
+      padding: 0.25rem 0.5rem;
+      background-color: var(--bg-tertiary);
+      border-radius: 3px;
+      margin: 0 0.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1px solid var(--border-color);
+    }
+    
+    .copy-button {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    
+    .copy-button:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--accent-primary);
+    }
+    
+    .peer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .peer-controls input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.5rem;
+      border-radius: 3px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-family: inherit;
+    }
+    
+    .peer-list {
+      margin-top: 1rem;
+      background-color: var(--bg-secondary);
+      border-radius: 0.25rem;
+      padding: 0.5rem;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+    }
+    
+    .peer-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .peer-item:last-child {
+      border-bottom: none;
+    }
+    
+    .p2p-tab-container {
+      margin-bottom: 1rem;
+    }
+    
+    .p2p-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 1rem;
+    }
+    
+    .p2p-tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      opacity: 0.7;
+      font-weight: 500;
+      position: relative;
+    }
+    
+    .p2p-tab.active {
+      opacity: 1;
+      color: var(--accent-secondary);
+    }
+    
+    .p2p-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--accent-primary);
+    }
+    
+    .p2p-tab-content {
+      display: none;
+    }
+    
+    .p2p-tab-content.active {
+      display: block;
+    }
+    
+    /* Retro & Old-school Americana additions */
+    .vintage-texture {
+      position: relative;
+    }
+    
+    .vintage-texture::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23333333' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.2;
+    }
+    
+    .retro-scanlines {
+      position: relative;
+    }
+    
+    .retro-scanlines::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, 0.1) 51%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.15;
+    }
+    
+    .crt-flicker {
+      animation: flicker 0.3s infinite;
+    }
+    
+    /* Category colors */
+    .category-goods {
+      border-left: 3px solid #ff3333;
+    }
+    
+    .category-services {
+      border-left: 3px solid #9933ff;
+    }
+    
+    .category-housing {
+      border-left: 3px solid #3399ff;
+    }
+    
+    .category-jobs {
+      border-left: 3px solid #33cc66;
+    }
+    
+    .category-community {
+      border-left: 3px solid #ff9933;
+    }
+    
+    /* Mobile responsive improvements */
+    @media (max-width: 640px) {
+      .peer-controls {
+        flex-direction: column;
+      }
+      
+      .peer-id {
+        max-width: 150px;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+      
+      .header > div {
+        width: 100%;
+      }
+      
+      .header button {
+        width: 100%;
+      }
+      
+      .board {
+        grid-template-columns: 1fr;
+      }
+      
+      .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-box {
+        width: 100%;
+        max-width: none;
+      }
+      
+      .search-box input {
+        flex: 1;
+      }
+      
+      .logo h1 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="retro-scanlines">
+  <div class="header">
+    <div class="logo">
+      <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+        <line x1="6" y1="9" x2="18" y2="9"></line>
+        <path d="M19 17v.6a2.4 2.4 0 0 1-2.4 2.4H7.4A2.4 2.4 0 0 1 5 17.6V17"></path>
+      </svg>
+      <h1>CROSSROAD</h1>
+    </div>
+    <div>
+      <button id="create-listing-btn">Make a Deal</button>
+    </div>
+  </div>
+  
+  <div class="main">
+    <!-- P2P Connection UI -->
+    <div class="p2p-tab-container">
+      <div class="p2p-tabs">
+        <div class="p2p-tab active" data-tab="listings">Offerings</div>
+        <div class="p2p-tab" data-tab="connections">Connections</div>
+      </div>
+      
+      <div class="p2p-tab-content active" id="listings-tab">
+        <!-- Listings will be added here by JS -->
+        <div class="filter-controls vintage-texture">
+          <div class="category-selector" id="filter-categories">
+            <div class="category-badge all selected" data-category="all">All</div>
+            <div class="category-badge goods" data-category="goods">Goods</div>
+            <div class="category-badge services" data-category="services">Services</div>
+            <div class="category-badge housing" data-category="housing">Housing</div>
+            <div class="category-badge jobs" data-category="jobs">Jobs</div>
+            <div class="category-badge community" data-category="community">Community</div>
+          </div>
+          
+          <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search offerings...">
+            <button id="search-button">🔍</button>
+          </div>
+        </div>
+        
+        <div class="board" id="listing-board">
+          <!-- Listings will be added here by JS -->
+          <div class="message" style="grid-column: 1 / -1;">
+            <h2>Welcome to Crossroad</h2>
+            <p>Make a deal - get anything you desire. Connect with peers or create your own listing.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p2p-tab-content" id="connections-tab">
+        <div class="peer-status vintage-texture">
+          <div id="status-indicator" class="status-indicator status-disconnected"></div>
+          <div>
+            <strong>Your Peer ID:</strong> 
+            <span id="my-peer-id" class="peer-id">Connecting...</span>
+            <button id="copy-id" class="copy-button" disabled>Copy</button>
+            <button id="reconnect" class="copy-button">Reconnect</button>
+          </div>
+        </div>
+        
+        <div class="peer-controls">
+          <input type="text" id="peer-id-input" placeholder="Enter peer ID to connect...">
+          <button id="connect-button" disabled>Connect</button>
+        </div>
+        
+        <div>
+          <h3>Connected Souls</h3>
+          <div id="peer-list" class="peer-list">
+            <div class="peer-item">No connected peers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Listing Modal -->
+  <div class="modal" id="create-listing-modal">
+    <div class="modal-content vintage-texture">
+      <div class="modal-header">
+        <h2 class="modal-title">Make Your Offering</h2>
+        <button class="close-button" id="close-modal-btn">&times;</button>
+      </div>
+      <form id="listing-form">
+        <div class="form-group">
+          <label for="listing-title">Title of Offering</label>
+          <input type="text" id="listing-title" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-category">Category</label>
+          <div class="category-selector" id="select-categories">
+            <div class="category-badge goods selected" data-category="goods">Goods</div>
+            <div class="category-badge services" data-category="services">Services</div>
+            <div class="category-badge housing" data-category="housing">Housing</div>
+            <div class="category-badge jobs" data-category="jobs">Jobs</div>
+            <div class="category-badge community" data-category="community">Community</div>
+          </div>
+          <input type="hidden" id="selected-category" value="goods">
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-description">Description</label>
+          <textarea id="listing-description" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-price">Price (Your Terms)</label>
+          <input type="text" id="listing-price" placeholder="$0.00 or other terms" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="listing-contact">Contact Information</label>
+          <input type="text" id="listing-contact" placeholder="How to reach you">
+        </div>
+        
+        <button type="submit" id="submit-listing-btn">Seal the Deal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+  
+  <script>
+    // P2P functionality - enhanced with "Crossroad" theme and styling
+    class PeerBoardP2P {
+      constructor() {
+        this.peer = null;
+        this.peerId = null;
+        this.connections = new Map();
+        this.onPeerConnected = null;
+        this.onPeerDisconnected = null;
+        this.onListingReceived = null;
+        this.userId = this.generateId();
+      }
+      
+      // Generate a random ID
+      generateId() {
+        return Math.random().toString(36).substring(2, 15);
+      }
+      
+      // Initialize the peer connection
+      initializePeer() {
+        return new Promise((resolve, reject) => {
+          try {
+            // Close existing peer if any
+            if (this.peer) {
+              this.peer.destroy();
+            }
+            
+            // Generate a new peer ID
+            this.peerId = `crossroad-${this.generateId()}`;
+            
+            // Create a new Peer instance with reliable ICE servers
+            this.peer = new Peer(this.peerId, {
+              debug: 2, // Enable more verbose debugging
+              config: {
+                'iceServers': [
+                  { urls: 'stun:stun.l.google.com:19302' },
+                  { urls: 'stun:stun1.l.google.com:19302' },
+                  { urls: 'stun:stun2.l.google.com:19302' },
+                  { urls: 'stun:stun3.l.google.com:19302' },
+                  { urls: 'stun:stun4.l.google.com:19302' }
+                ]
+              }
+            });
+            
+            // Handle connection events
+            this.peer.on('open', (id) => {
+              console.log('My peer ID is:', id);
+              this.setupPeerEvents();
+              resolve(id);
+            });
+            
+            this.peer.on('error', (err) => {
+              console.error('Peer error:', err);
+              reject(err);
+            });
+          } catch (error) {
+            console.error('Failed to initialize peer:', error);
+            reject(error);
+          }
+        });
+      }
+      
+      // Set up event handlers for peer
+      setupPeerEvents() {
+        if (!this.peer) return;
+        
+        this.peer.on('connection', (conn) => {
+          console.log("Received connection attempt from:", conn.peer);
+          this.handleConnection(conn);
+        });
+        
+        this.peer.on('disconnected', () => {
+          console.log('Peer disconnected');
+        });
+      }
+      
+      // Handle new connections
+      handleConnection(conn) {
+        console.log('Connected to:', conn.peer);
+        
+        // Store the connection
+        this.connections.set(conn.peer, conn);
+        
+        // Set up message handling
+        conn.on('open', () => {
+          console.log("Connection opened with:", conn.peer);
+          
+          // Notify callback if exists
+          if (this.onPeerConnected) {
+            this.onPeerConnected(conn.peer);
+          }
+          
+          // Send a hello message
+          this.sendHello(conn.peer);
+        });
+        
+        conn.on('data', (data) => {
+          console.log("Received data from:", conn.peer, data);
+          this.handleMessage(data, conn);
+        });
+        
+        conn.on('close', () => {
+          console.log('Connection closed:', conn.peer);
+          this.connections.delete(conn.peer);
+          
+          if (this.onPeerDisconnected) {
+            this.onPeerDisconnected(conn.peer);
+          }
+        });
+        
+        conn.on('error', (err) => {
+          console.error('Connection error:', conn.peer, err);
+        });
+      }
+      
+      // Connect to another peer
+      connectToPeer(peerId) {
+        return new Promise((resolve) => {
+          if (!this.peer || peerId === this.peerId) {
+            console.log("Cannot connect: Invalid peer conditions");
+            resolve(false);
+            return;
+          }
+          
+          // Check if already connected
+          if (this.connections.has(peerId)) {
+            console.log("Already connected to:", peerId);
+            resolve(true);
+            return;
+          }
+          
+          try {
+            console.log("Attempting to connect to:", peerId);
+            const conn = this.peer.connect(peerId, { 
+              reliable: true,
+              serialization: 'json',
+              metadata: { sender: this.peerId }
+            });
+            
+            conn.on('open', () => {
+              console.log("Successfully opened connection to:", peerId);
+              this.handleConnection(conn);
+              resolve(true);
+            });
+            
+            conn.on('error', (err) => {
+              console.error('Connection error:', err);
+              resolve(false);
+            });
+            
+            // Set a timeout in case connection never opens
+            setTimeout(() => {
+              if (!this.connections.has(peerId)) {
+                console.log("Connection timeout for:", peerId);
+                resolve(false);
+              }
+            }, 15000); // 15 seconds timeout
+          } catch (error) {
+            console.error('Failed to connect:', error);
+            resolve(false);
+          }
+        });
+      }
+      
+      // Disconnect from a peer
+      disconnectFromPeer(peerId) {
+        const conn = this.connections.get(peerId);
+        if (conn) {
+          conn.close();
+          this.connections.delete(peerId);
+        }
+      }
+      
+      // Send a message to a specific peer
+      sendToPeer(peerId, message) {
+        const conn = this.connections.get(peerId);
+        if (conn) {
+          console.log("Sending message to:", peerId, message);
+          conn.send(message);
+          return true;
+        }
+        console.log("Failed to send - no connection to:", peerId);
+        return false;
+      }
+      
+      // Broadcast a message to all connected peers
+      broadcast(message) {
+        console.log("Broadcasting message to all peers:", message);
+        this.connections.forEach((conn) => {
+          conn.send(message);
+        });
+      }
+      
+      // Handle incoming messages
+      handleMessage(message, connection) {
+        console.log('Received message:', message.type, "from:", connection.peer);
+        
+        switch (message.type) {
+          case 'HELLO':
+            this.handleHelloMessage(message, connection);
+            break;
+          case 'LISTING_BROADCAST':
+            if (this.onListingReceived) {
+              this.onListingReceived(message.listing);
+            }
+            break;
+        }
+      }
+      
+      // Handle hello messages
+      handleHelloMessage(message, connection) {
+        // Reply with hello
+        console.log('Received hello from:', message.senderId);
+        this.sendHello(connection.peer);
+      }
+      
+      // Send hello to a peer
+      sendHello(peerId) {
+        const message = {
+          type: 'HELLO',
+          senderId: this.peerId,
+          timestamp: Date.now(),
+          messageId: this.generateId(),
+        };
+        
+        console.log("Sending hello to:", peerId);
+        return this.sendToPeer(peerId, message);
+      }
+      
+      // Broadcast a listing to all peers
+      broadcastListing(listing) {
+        const message = {
+          type: 'LISTING_BROADCAST',
+          senderId: this.peerId,
+          timestamp: Date.now(),
+          messageId: this.generateId(),
+          listing: listing
+        };
+        
+        this.broadcast(message);
+      }
+      
+      // Get connected peers
+      getConnectedPeers() {
+        return Array.from(this.connections.keys());
+      }
+      
+      // Destroy peer connection
+      destroy() {
+        if (this.peer) {
+          this.peer.destroy();
+          this.peer = null;
+          this.connections.clear();
+        }
+      }
+    }
+    
+    // App functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize P2P service
+      const p2pService = new PeerBoardP2P();
+      
+      // DOM elements
+      const statusIndicator = document.getElementById('status-indicator');
+      const myPeerIdElement = document.getElementById('my-peer-id');
+      const copyIdButton = document.getElementById('copy-id');
+      const reconnectButton = document.getElementById('reconnect');
+      const peerIdInput = document.getElementById('peer-id-input');
+      const connectButton = document.getElementById('connect-button');
+      const peerList = document.getElementById('peer-list');
+      const listingBoard = document.getElementById('listing-board');
+      const createListingBtn = document.getElementById('create-listing-btn');
+      const createListingModal = document.getElementById('create-listing-modal');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const listingForm = document.getElementById('listing-form');
+      const filterCategories = document.getElementById('filter-categories');
+      const selectCategories = document.getElementById('select-categories');
+      const selectedCategoryInput = document.getElementById('selected-category');
+      const searchInput = document.getElementById('search-input');
+      const searchButton = document.getElementById('search-button');
+      const p2pTabs = document.querySelectorAll('.p2p-tab');
+      const p2pTabContents = document.querySelectorAll('.p2p-tab-content');
+      
+      // Listings storage
+      let listings = JSON.parse(localStorage.getItem('crossroadListings') || '[]');
+      const externalListings = new Map();
+      
+      // Initialize peer connection
+      initializePeer();
+      
+      // Set up P2P callbacks
+      p2pService.onPeerConnected = (peerId) => {
+        updatePeerList();
+        showToast(`Connected to: ${peerId.substring(0, 8)}...`);
+        
+        // Share our listings with the new peer
+        listings.forEach(listing => {
+          p2pService.sendToPeer(peerId, {
+            type: 'LISTING_BROADCAST',
+            senderId: p2pService.peerId,
+            timestamp: Date.now(),
+            messageId: p2pService.generateId(),
+            listing: listing
+          });
+        });
+      };
+      
+      p2pService.onPeerDisconnected = (peerId) => {
+        updatePeerList();
+        showToast(`Disconnected from: ${peerId.substring(0, 8)}...`);
+        
+        // Remove the peer's listings
+        const updatedExternalListings = new Map();
+        externalListings.forEach((listing, id) => {
+          if (listing.peerId !== peerId) {
+            updatedExternalListings.set(id, listing);
+          }
+        });
+        
+        if (externalListings.size !== updatedExternalListings.size) {
+          externalListings.clear();
+          updatedExternalListings.forEach((listing, id) => {
+            externalListings.set(id, listing);
+          });
+          renderListings();
+        }
+      };
+      
+      p2pService.onListingReceived = (listing) => {
+        // Add peer ID to the listing
+        listing.peerId = listing.peerId || p2pService.peerId; // Use sender's peer ID if not provided
+        listing.external = true;
+        
+        externalListings.set(listing.id, listing);
+        showToast(`New offering received: ${listing.title}`);
+        renderListings();
+      };
+      
+      // Initialize peer connection
+      async function initializePeer() {
+        try {
+          const peerId = await p2pService.initializePeer();
+          myPeerIdElement.textContent = peerId;
+          statusIndicator.classList.remove('status-disconnected');
+          statusIndicator.classList.add('status-connected');
+          copyIdButton.disabled = false;
+          connectButton.disabled = false;
+          
+          showToast('Connected to Crossroad network');
+        } catch (error) {
+          console.error('Failed to initialize peer:', error);
+          myPeerIdElement.textContent = 'Connection failed';
+          statusIndicator.classList.remove('status-connected');
+          statusIndicator.classList.add('status-disconnected');
+          
+          showToast('Failed to connect to network. Try reconnecting.', 'error');
+        }
+      }
+      
+      // Update the peer list UI
+      function updatePeerList() {
+        const peers = p2pService.getConnectedPeers();
+        
+        if (peers.length === 0) {
+          peerList.innerHTML = '<div class="peer-item">No connected souls</div>';
+          return;
+        }
+        
+        peerList.innerHTML = '';
+        peers.forEach(peerId => {
+          const peerItem = document.createElement('div');
+          peerItem.className = 'peer-item';
+          
+          const statusDot = document.createElement('div');
+          statusDot.className = 'status-indicator status-connected';
+          statusDot.style.marginRight = '0.5rem';
+          
+          const peerIdText = document.createElement('span');
+          peerIdText.textContent = `${peerId.substring(0, 12)}...`;
+          peerIdText.className = 'peer-id';
+          
+          const disconnectBtn = document.createElement('button');
+          disconnectBtn.textContent = 'Disconnect';
+          disconnectBtn.className = 'copy-button';
+          disconnectBtn.style.marginLeft = 'auto';
+          disconnectBtn.addEventListener('click', () => {
+            p2pService.disconnectFromPeer(peerId);
+            updatePeerList();
+          });
+          
+          peerItem.appendChild(statusDot);
+          peerItem.appendChild(peerIdText);
+          peerItem.appendChild(disconnectBtn);
+          
+          peerList.appendChild(peerItem);
+        });
+      }
+      
+      // Get all listings (local + external)
+      function getAllListings() {
+        const allListings = [...listings];
+        
+        externalListings.forEach(listing => {
+          allListings.push(listing);
+        });
+        
+        return allListings;
+      }
+      
+      // Render listings with filters
+      function renderListings(filter = 'all', searchQuery = '') {
+        listingBoard.innerHTML = '';
+        const allListings = getAllListings();
+        
+        const filteredListings = allListings.filter(listing => {
+          const matchesCategory = filter === 'all' || listing.category === filter;
+          const matchesSearch = !searchQuery || 
+            listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            listing.description.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
+        
+        if (filteredListings.length === 0) {
+          listingBoard.innerHTML = `
+            <div class="message" style="grid-column: 1 / -1;">
+              <h2>No offerings found</h2>
+              <p>Adjust your filters or create a new offering.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        filteredListings.forEach(listing => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          
+          const isExternal = listing.external === true;
+          
+          card.innerHTML = `
+            <div class="card-img">No Image</div>
+            <div class="card-content">
+              <div class="badge category-${listing.category}">
+                ${capitalizeFirstLetter(listing.category)}
+                ${isExternal ? '<span style="margin-left: 4px;">• Remote</span>' : ''}
+              </div>
+              <h3>${listing.title}</h3>
+              <p>${listing.description}</p>
+              <div class="card-footer">
+                <span class="price">${listing.price}</span>
+                <span class="time">${listing.time || 'Just now'}</span>
+              </div>
+            </div>
+          `;
+          
+          card.addEventListener('click', () => {
+            showToast(`Contact for "${listing.title}": ${listing.contact || 'No contact info provided'}`);
+          });
+          
+          listingBoard.appendChild(card);
+        });
+      }
+      
+      // Copy peer ID to clipboard
+      copyIdButton.addEventListener('click', () => {
+        const peerId = myPeerIdElement.textContent;
+        navigator.clipboard.writeText(peerId)
+          .then(() => {
+            showToast('Peer ID copied to clipboard');
+          })
+          .catch(err => {
+            console.error('Failed to copy:', err);
+          });
+      });
+      
+      // Connect to a peer
+      connectButton.addEventListener('click', async () => {
+        const peerId = peerIdInput.value.trim();
+        if (peerId) {
+          connectButton.disabled = true;
+          connectButton.textContent = 'Connecting...';
+          
+          console.log("Initiating connection to:", peerId);
+          const success = await p2pService.connectToPeer(peerId);
+          
+          if (success) {
+            showToast(`Connected to ${peerId.substring(0, 8)}...`);
+            peerIdInput.value = '';
+          } else {
+            showToast(`Failed to connect to ${peerId.substring(0, 8)}...`, 'error');
+          }
+          
+          connectButton.disabled = false;
+          connectButton.textContent = 'Connect';
+          updatePeerList();
+        }
+      });
+      
+      // Enter key in peer ID input should trigger connect button
+      peerIdInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !connectButton.disabled) {
+          connectButton.click();
+        }
+      });
+      
+      // Reconnect button
+      reconnectButton.addEventListener('click', () => {
+        initializePeer();
+      });
+      
+      // Handle category selection in create form
+      selectCategories.addEventListener('click', (e) => {
+        if (e.target.classList.contains('category-badge')) {
+          // Remove selected class from all badges
+          selectCategories.querySelectorAll('.category-badge').forEach(badge => {
+            badge.classList.remove('selected');
+          });
+          
+          // Add selected class to clicked badge
+          e.target.classList.add('selected');
+          
+          // Update hidden input
+          selectedCategoryInput.value = e.target.dataset.category;
+        }
+      });
+      
+      // Filter by category
+      filterCategories.addEventListener('click', (e) => {
+        if (e.target.classList.contains('category-badge')) {
+          // Remove selected class from all badges
+          filterCategories.querySelectorAll('.category-badge').forEach(badge => {
+            badge.classList.remove('selected');
+          });
+          
+          // Add selected class to clicked badge
+          e.target.classList.add('selected');
+          
+          // Apply filter
+          renderListings(e.target.dataset.category, searchInput.value);
+        }
+      });
+      
+      // Search functionality
+      searchButton.addEventListener('click', () => {
+        const activeFilter = filterCategories.querySelector('.selected').dataset.category;
+        renderListings(activeFilter, searchInput.value);
+      });
+      
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const activeFilter = filterCategories.querySelector('.selected').dataset.category;
+          renderListings(activeFilter, searchInput.value);
+        }
+      });
+      
+      // Create listing modal handlers
+      createListingBtn.addEventListener('click', () => {
+        createListingModal.classList.add('active');
+      });
+      
+      closeModalBtn.addEventListener('click', () => {
+        createListingModal.classList.remove('active');
+      });
+      
+      // Close modal when clicking outside
+      window.addEventListener('click', (e) => {
+        if (e.target === createListingModal) {
+          createListingModal.classList.remove('active');
+        }
+      });
+      
+      // P2P Tab functionality
+      p2pTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.dataset.tab;
+          
+          // Update active tab
+          p2pTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Update active content
+          p2pTabContents.forEach(content => content.classList.remove('active'));
+          document.getElementById(`${tabName}-tab`).classList.add('active');
+        });
+      });
+      
+      // Form submission
+      listingForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const newListing = {
+          id: Date.now().toString(),
+          title: document.getElementById('listing-title').value,
+          description: document.getElementById('listing-description').value,
+          price: document.getElementById('listing-price').value,
+          category: selectedCategoryInput.value,
+          contact: document.getElementById('listing-contact').value,
+          time: 'Just now'
+        };
+        
+        // Save to local storage
+        listings.push(newListing);
+        localStorage.setItem('crossroadListings', JSON.stringify(listings));
+        
+        // Broadcast to peers
+        p2pService.broadcastListing(newListing);
+        
+        // Reset form and close modal
+        listingForm.reset();
+        createListingModal.classList.remove('active');
+        
+        // Rerender with current filters
+        const activeFilter = filterCategories.querySelector('.selected').dataset.category;
+        renderListings(activeFilter, searchInput.value);
+        
+        showToast('Your offering has been posted and shared with connected peers!');
+      });
+      
+      // Helper function to capitalize first letter
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+      
+      // Toast notifications with themed styling
+      function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        if (type === 'error') {
+          toast.style.borderLeftColor = '#ff3333';
+        } else if (type === 'success') {
+          toast.style.borderLeftColor = '#33cc66';
+        }
+        
+        toast.textContent = message;
+        
+        toastContainer.appendChild(toast);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => {
+            toastContainer.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
+      
+      // Initialize the board
+      renderListings();
+      
+      // Auto-select the first category in the creation form
+      const firstCategoryBadge = selectCategories.querySelector('.category-badge');
+      if (firstCategoryBadge) {
+        firstCategoryBadge.classList.add('selected');
+        selectedCategoryInput.value = firstCategoryBadge.dataset.category;
+      }
+    });
+  </script>
+</body>
+</html>

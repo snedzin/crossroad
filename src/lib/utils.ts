@@ -41,6 +41,50 @@ export function formatDate(timestamp: number, includeTime: boolean = false) {
   }).format(date);
 }
 
+export function formatRelativeTime(timestamp: number) {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  
+  // Convert to seconds
+  const diffSec = Math.floor(diffMs / 1000);
+  
+  if (diffSec < 60) {
+    return "just now";
+  }
+  
+  // Convert to minutes
+  const diffMin = Math.floor(diffSec / 60);
+  
+  if (diffMin < 60) {
+    return `${diffMin} minute${diffMin === 1 ? '' : 's'} ago`;
+  }
+  
+  // Convert to hours
+  const diffHour = Math.floor(diffMin / 60);
+  
+  if (diffHour < 24) {
+    return `${diffHour} hour${diffHour === 1 ? '' : 's'} ago`;
+  }
+  
+  // Convert to days
+  const diffDay = Math.floor(diffHour / 24);
+  
+  if (diffDay < 30) {
+    return `${diffDay} day${diffDay === 1 ? '' : 's'} ago`;
+  }
+  
+  // Convert to months
+  const diffMonth = Math.floor(diffDay / 30);
+  
+  if (diffMonth < 12) {
+    return `${diffMonth} month${diffMonth === 1 ? '' : 's'} ago`;
+  }
+  
+  // Convert to years
+  const diffYear = Math.floor(diffMonth / 12);
+  return `${diffYear} year${diffYear === 1 ? '' : 's'} ago`;
+}
+
 export function getCategoryColor(category: ListingCategory) {
   switch (category) {
     case ListingCategory.GOODS:
@@ -77,4 +121,68 @@ export function getStatusColor(status: ListingStatus | DealStatus) {
     default:
       return "bg-gray-500 text-white";
   }
+}
+
+export function getCategoryName(category: ListingCategory): string {
+  return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+}
+
+export function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+}
+
+export function validateListing(data: any): string | null {
+  if (!data.title || data.title.trim().length < 3) {
+    return "Title must be at least 3 characters long";
+  }
+  
+  if (!data.description || data.description.trim().length < 10) {
+    return "Description must be at least 10 characters long";
+  }
+  
+  if (!data.category) {
+    return "Category is required";
+  }
+  
+  return null; // No validation errors
+}
+
+export function filterListings(listings: any[], filters: any) {
+  return listings.filter(listing => {
+    // Filter by category if specified
+    if (filters.category && listing.category !== filters.category) {
+      return false;
+    }
+    
+    // Filter by search term if specified
+    if (filters.searchTerm && filters.searchTerm.trim() !== '') {
+      const searchTermLower = filters.searchTerm.toLowerCase();
+      const titleMatch = listing.title.toLowerCase().includes(searchTermLower);
+      const descMatch = listing.description.toLowerCase().includes(searchTermLower);
+      const tagsMatch = listing.tags && listing.tags.some((tag: string) => 
+        tag.toLowerCase().includes(searchTermLower)
+      );
+      
+      if (!titleMatch && !descMatch && !tagsMatch) {
+        return false;
+      }
+    }
+    
+    // Filter by creator if specified
+    if (filters.createdBy && listing.createdBy !== filters.createdBy) {
+      return false;
+    }
+    
+    // Filter by status if specified
+    if (filters.status && listing.status !== filters.status) {
+      return false;
+    }
+    
+    return true;
+  });
 }

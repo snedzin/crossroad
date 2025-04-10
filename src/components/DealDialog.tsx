@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { useDealStore } from "@/stores/dealStore";
 import { useUserStore } from "@/stores/userStore";
 import { formatDate, getStatusColor } from "@/lib/utils";
 import { Deal, DealStatus, Listing } from "@/lib/types";
-import { MessageCircle, Check, X } from "lucide-react";
+import { MessageCircle, Check, X, BookOpen } from "lucide-react";
 import DealCommentsSection from "./DealCommentsSection";
 import ChatDialog from "./ChatDialog";
 
@@ -22,7 +22,7 @@ interface DealDialogProps {
 
 const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
   const { toast } = useToast();
-  const { createDeal, updateDealStatus } = useDealStore();
+  const { createDeal, updateDealStatus, markDealAsOpened } = useDealStore();
   const { currentUser, getUserById } = useUserStore();
   
   const [loading, setLoading] = useState(false);
@@ -32,6 +32,18 @@ const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
   // If we have a deal, use it; otherwise create a new one
   const existingDeal = deal;
   const isNewDeal = !existingDeal;
+  
+  // Mark deal as opened when dialog opens
+  useEffect(() => {
+    if (open && existingDeal && currentUser) {
+      const openedBy = existingDeal.openedBy || [];
+      if (!openedBy.includes(currentUser.id)) {
+        markDealAsOpened(existingDeal.id).catch(err => 
+          console.error("Failed to mark deal as opened:", err)
+        );
+      }
+    }
+  }, [open, existingDeal, currentUser, markDealAsOpened]);
   
   // Get the other party in the deal
   const otherPartyId = existingDeal 
@@ -165,8 +177,13 @@ const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-board-card text-gray-800">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center">
               {isNewDeal ? "Propose a Deal" : "Deal Details"}
+              {existingDeal?.opened && (
+                <Badge className="ml-2 bg-board-primary">
+                  <BookOpen className="h-3 w-3 mr-1" /> Opened
+                </Badge>
+              )}
             </DialogTitle>
           </DialogHeader>
           

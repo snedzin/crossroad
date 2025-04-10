@@ -71,6 +71,9 @@ export interface Deal {
   completedAt?: number;
   terms?: string;
   messages?: Message[];
+  opened?: boolean; // New field to track if the deal has been opened
+  openedBy?: string[]; // Array of user IDs who have opened the deal
+  lastOpenedAt?: number; // Timestamp when the deal was last opened
 }
 
 // Message model for deal communications

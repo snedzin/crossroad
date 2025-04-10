@@ -1,4 +1,3 @@
-
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ListingCategory, ListingStatus, DealStatus } from "./types";
@@ -121,6 +120,18 @@ export function getStatusColor(status: ListingStatus | DealStatus) {
     default:
       return "bg-gray-500 text-white";
   }
+}
+
+export function getOpenedStatusColor(opened: boolean, openedByCurrentUser: boolean) {
+  if (!opened) {
+    return "bg-gray-200 text-gray-800";
+  }
+  
+  if (openedByCurrentUser) {
+    return "bg-board-primary text-white";
+  }
+  
+  return "bg-purple-400 text-white";
 }
 
 export function getCategoryName(category: ListingCategory): string {

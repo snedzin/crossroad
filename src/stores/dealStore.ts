@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import { Deal, DealStatus, Message } from "@/lib/types";
 import { STORES, addItem, getAllItems, getItemByKey, updateItem } from "@/lib/db";
@@ -13,9 +12,11 @@ interface DealState {
   loadAllDeals: () => Promise<Deal[]>;
   createDeal: (listingId: string, recipientId: string, terms?: string) => Promise<Deal>;
   updateDealStatus: (id: string, status: DealStatus) => Promise<Deal>;
+  markDealAsOpened: (id: string) => Promise<Deal>;
   getDealById: (id: string) => Deal | undefined;
   getDealsByListingId: (listingId: string) => Deal[];
   getDealsByUserId: (userId: string) => Deal[];
+  getUnreadDealsCount: (userId: string) => number;
   addMessage: (dealId: string, content: string, toPeerId: string) => Promise<Message>;
   getMessagesForDeal: (dealId: string) => Message[];
   addExternalDeal: (deal: Deal) => void;
@@ -147,6 +148,49 @@ export const useDealStore = create<DealState>((set, get) => ({
     }
   },
 
+  // Mark a deal as opened
+  markDealAsOpened: async (id: string) => {
+    try {
+      const deal = await getItemByKey<Deal>(STORES.DEALS, id);
+      
+      if (!deal) {
+        throw new Error(`Deal not found: ${id}`);
+      }
+      
+      const currentUser = useUserStore.getState().currentUser;
+      
+      if (!currentUser) {
+        throw new Error("No user profile found");
+      }
+      
+      // Initialize arrays if they don't exist
+      const openedBy = deal.openedBy || [];
+      
+      // Check if user has already opened this deal
+      if (!openedBy.includes(currentUser.id)) {
+        openedBy.push(currentUser.id);
+      }
+      
+      const updatedDeal: Deal = {
+        ...deal,
+        opened: true,
+        openedBy,
+        lastOpenedAt: Date.now(),
+      };
+      
+      await updateItem(STORES.DEALS, updatedDeal);
+      
+      set((state) => ({
+        deals: state.deals.map(d => d.id === id ? updatedDeal : d),
+      }));
+      
+      return updatedDeal;
+    } catch (error) {
+      console.error("Failed to mark deal as opened:", error);
+      throw error;
+    }
+  },
+
   // Get a deal by ID
   getDealById: (id: string) => {
     return get().deals.find(deal => deal.id === id);
@@ -162,6 +206,21 @@ export const useDealStore = create<DealState>((set, get) => ({
     return get().deals.filter(deal => 
       deal.initiatorId === userId || deal.recipientId === userId
     );
+  },
+  
+  // Get count of unread deals for a user
+  getUnreadDealsCount: (userId: string) => {
+    const deals = get().deals;
+    return deals.filter(deal => {
+      // Deal is relevant to this user
+      const isRelevantToUser = deal.initiatorId === userId || deal.recipientId === userId;
+      
+      // Deal has not been opened or not opened by this user
+      const openedBy = deal.openedBy || [];
+      const notOpenedByUser = !openedBy.includes(userId);
+      
+      return isRelevantToUser && notOpenedByUser;
+    }).length;
   },
 
   // Add a message to a deal

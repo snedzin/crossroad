@@ -11,7 +11,7 @@ import {
   getStatusColor, 
   getOpenedStatusColor 
 } from "@/lib/utils";
-import { MessageCircle, BookOpen } from "lucide-react";
+import { MessageCircle, BookOpen, Link } from "lucide-react";
 import DealDialog from "./DealDialog";
 
 interface DealsListProps {
@@ -22,7 +22,7 @@ interface DealsListProps {
 
 const DealsList = ({ userId, listingId, limit }: DealsListProps) => {
   const { deals, getDealsByUserId, getDealsByListingId } = useDealStore();
-  const { currentUser } = useUserStore();
+  const { currentUser, getUserById } = useUserStore();
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   
   // Get filtered deals based on props
@@ -83,6 +83,10 @@ const DealsList = ({ userId, listingId, limit }: DealsListProps) => {
         const isOpened = Boolean(deal.opened);
         const openedByCurrentUser = hasOpenedDeal(deal);
         
+        // Get user information for display
+        const author = getUserById(deal.initiatorId);
+        const authorPeerId = author?.peerId || "Unknown";
+        
         return (
           <Card 
             key={deal.id} 
@@ -121,16 +125,23 @@ const DealsList = ({ userId, listingId, limit }: DealsListProps) => {
               )}
               
               <div className="mt-3 flex justify-between items-center">
-                <span className="text-xs text-gray-500">
-                  {formatDate(deal.createdAt, true)}
-                </span>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Link className="h-3 w-3 mr-1" />
+                  Peer: {authorPeerId.substring(0, 10)}...
+                </div>
                 
-                {deal.messages && deal.messages.length > 0 && (
-                  <div className="flex items-center text-xs text-gray-500">
-                    <MessageCircle className="h-3 w-3 mr-1" />
-                    {deal.messages.length} message{deal.messages.length !== 1 ? 's' : ''}
-                  </div>
-                )}
+                <div className="flex items-center">
+                  <span className="text-xs text-gray-500 mr-3">
+                    {formatDate(deal.createdAt, true)}
+                  </span>
+                  
+                  {deal.messages && deal.messages.length > 0 && (
+                    <div className="flex items-center text-xs text-gray-500">
+                      <MessageCircle className="h-3 w-3 mr-1" />
+                      {deal.messages.length} message{deal.messages.length !== 1 ? 's' : ''}
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

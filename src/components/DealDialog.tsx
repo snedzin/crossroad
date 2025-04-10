@@ -7,9 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { useDealStore } from "@/stores/dealStore";
 import { useUserStore } from "@/stores/userStore";
+import { usePeerStore } from "@/stores/peerStore";
 import { formatDate, getStatusColor } from "@/lib/utils";
 import { Deal, DealStatus, Listing } from "@/lib/types";
-import { MessageCircle, Check, X, BookOpen } from "lucide-react";
+import { MessageCircle, Check, X, BookOpen, Link, Share } from "lucide-react";
 import DealCommentsSection from "./DealCommentsSection";
 import ChatDialog from "./ChatDialog";
 
@@ -24,10 +25,12 @@ const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
   const { toast } = useToast();
   const { createDeal, updateDealStatus, markDealAsOpened } = useDealStore();
   const { currentUser, getUserById } = useUserStore();
+  const { connectToPeer } = usePeerStore();
   
   const [loading, setLoading] = useState(false);
   const [terms, setTerms] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   
   // If we have a deal, use it; otherwise create a new one
   const existingDeal = deal;
@@ -117,6 +120,37 @@ const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
     }
   };
   
+  const handleConnectToPeer = async () => {
+    if (!otherParty?.peerId) return;
+    
+    setConnecting(true);
+    try {
+      const connected = await connectToPeer(otherParty.peerId);
+      
+      if (connected) {
+        toast({
+          title: "Connected to peer",
+          description: `Successfully connected to ${otherParty.name || 'peer'}'s instance`,
+        });
+      } else {
+        toast({
+          title: "Connection failed",
+          description: "Could not connect to peer. They might be offline.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to connect to peer:", error);
+      toast({
+        title: "Connection error",
+        description: "An error occurred while connecting to peer",
+        variant: "destructive",
+      });
+    } finally {
+      setConnecting(false);
+    }
+  };
+  
   const renderDealActions = () => {
     return (
       <div className="flex flex-wrap gap-2 mt-4">
@@ -159,11 +193,21 @@ const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
           </Button>
         )}
         
+        {otherParty && otherParty.peerId && (
+          <Button 
+            onClick={handleConnectToPeer}
+            variant="outline"
+            disabled={connecting}
+            className="ml-auto"
+          >
+            <Link className="h-4 w-4 mr-2" /> Connect
+          </Button>
+        )}
+        
         {existingDeal && otherParty && (
           <Button 
             onClick={() => setChatOpen(true)} 
             variant="outline"
-            className="ml-auto"
           >
             <MessageCircle className="h-4 w-4 mr-2" /> Chat
           </Button>
@@ -206,6 +250,21 @@ const DealDialog = ({ listing, deal, open, onOpenChange }: DealDialogProps) => {
                   Created on {formatDate(existingDeal.createdAt)}
                 </span>
               </div>
+              
+              {otherParty && (
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <h3 className="text-sm font-medium mb-1">Deal Partner</h3>
+                  <div className="flex items-center justify-between">
+                    <span>{otherParty.name || "Unknown User"}</span>
+                    {otherParty.peerId && (
+                      <div className="flex items-center text-xs bg-gray-100 px-2 py-1 rounded">
+                        <Link className="h-3 w-3 mr-1" />
+                        <span className="font-mono">PeerID: {otherParty.peerId}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               
               <Separator />
               

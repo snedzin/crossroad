@@ -14,14 +14,15 @@ import {
   DealProposalMessage,
   ChatMessage,
   DealResponseMessage,
+  PeerListMessage,
 } from "@/lib/types";
 
 // Hidden component that manages P2P connections and message handling
 const PeerManager = () => {
   const { toast } = useToast();
   const { currentUser, addOrUpdateUser } = useUserStore();
-  const { addExternalListing } = useListingStore();
-  const { addExternalDeal, addExternalMessage } = useDealStore();
+  const { listings, addExternalListing } = useListingStore();
+  const { deals, addExternalDeal, addExternalMessage } = useDealStore();
   
   // Set up message handlers when the component mounts
   useEffect(() => {
@@ -42,6 +43,34 @@ const PeerManager = () => {
         // If we have user data, send it back
         if (currentUser) {
           peerService.sendHello(message.senderId, currentUser);
+          
+          // Share our listings with the new peer
+          listings.forEach(listing => {
+            peerService.sendToPeer(message.senderId, {
+              type: MessageType.LISTING_BROADCAST,
+              senderId: peerService.getPeerId() || '',
+              timestamp: Date.now(),
+              messageId: `listing-sync-${listing.id}`,
+              listing
+            });
+          });
+          
+          // Share our deals with the new peer that they should know about
+          deals.forEach(deal => {
+            // Only share deals where the new peer is involved
+            if (deal.initiatorId === message.userData.id || deal.recipientId === message.userData.id) {
+              peerService.sendToPeer(message.senderId, {
+                type: MessageType.DEAL_PROPOSAL,
+                senderId: peerService.getPeerId() || '',
+                timestamp: Date.now(),
+                messageId: `deal-sync-${deal.id}`,
+                deal
+              });
+            }
+          });
+          
+          // Share our known peers
+          peerService.sharePeers(message.senderId);
         }
       }
     });
@@ -103,11 +132,26 @@ const PeerManager = () => {
       }
     );
     
+    // Handle peer list messages
+    peerService.addMessageHandler<PeerListMessage>(
+      MessageType.PEER_LIST,
+      (message) => {
+        console.log("Received peer list with", message.peers.length, "peers");
+        
+        // Try to connect to each peer in the list
+        if (currentUser) {
+          message.peers.forEach(peerId => {
+            peerService.connectToPeer(peerId);
+          });
+        }
+      }
+    );
+    
     // Clean up on component unmount
     return () => {
       // No need to remove handlers as the component is never unmounted
     };
-  }, [toast, addOrUpdateUser, addExternalListing, addExternalDeal, addExternalMessage, currentUser]);
+  }, [toast, addOrUpdateUser, addExternalListing, addExternalDeal, addExternalMessage, currentUser, listings, deals]);
   
   return null; // This component doesn't render anything
 };

@@ -55,6 +55,9 @@ const PeerConnectButton = () => {
     }
   };
   
+  // Convert Map to array for rendering
+  const connectedPeersArray = Array.from(connectedPeers.keys());
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -78,13 +81,13 @@ const PeerConnectButton = () => {
             </div>
           )}
           
-          {connectedPeers.length > 0 && (
+          {connectedPeersArray.length > 0 && (
             <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-              <h3 className="text-sm font-semibold mb-1">Connected Peers ({connectedPeers.length})</h3>
+              <h3 className="text-sm font-semibold mb-1">Connected Peers ({connectedPeersArray.length})</h3>
               <div className="max-h-24 overflow-y-auto">
-                {connectedPeers.map((peer, index) => (
+                {connectedPeersArray.map((peerId, index) => (
                   <div key={index} className="text-xs font-mono break-all mb-1 flex items-center justify-between">
-                    <span>{peer.substring(0, 16)}...</span>
+                    <span>{peerId.substring(0, 16)}...</span>
                   </div>
                 ))}
               </div>

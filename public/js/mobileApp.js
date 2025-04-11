@@ -1,9 +1,9 @@
-
 // Mobile app main script
 
 // Global variables
 let currentUser = null;
 let currentViewingListing = null;
+let currentViewingDeal = null;
 
 // Initialize the application
 async function initApp() {
@@ -340,6 +340,30 @@ function setupEventListeners() {
     } catch (err) {
       console.error('Error updating profile:', err);
       showToast('Error', 'Failed to update profile', 'error');
+    }
+  });
+  
+  // Deal view dialog
+  document.getElementById('closeDealViewDialog').addEventListener('click', () => {
+    document.getElementById('dealViewDialog').classList.remove('open');
+    currentViewingDeal = null;
+  });
+  
+  // Comment submission
+  document.getElementById('submitComment').addEventListener('click', () => {
+    const commentText = document.getElementById('commentText').value;
+    const dealId = document.getElementById('dealViewDialog').dataset.dealId;
+    
+    if (dealId && commentText.trim()) {
+      addComment(dealId, commentText);
+    }
+  });
+  
+  // Enter key in comment box
+  document.getElementById('commentText').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('submitComment').click();
     }
   });
 }

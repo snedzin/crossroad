@@ -1,4 +1,3 @@
-
 // IndexedDB database operations
 const DB_VERSION = 1;
 const DB_NAME = "peerBoardDB";
@@ -7,42 +6,45 @@ let db;
 // Initialize IndexedDB
 async function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDB.open('p2pBulletinBoard', 2);
     
     request.onupgradeneeded = (event) => {
-      db = event.target.result;
+      const db = event.target.result;
       
       // Create object stores if they don't exist
-      if (!db.objectStoreNames.contains('listings')) {
-        const listingStore = db.createObjectStore('listings', { keyPath: 'id' });
-        listingStore.createIndex('by_author', 'authorId', { unique: false });
-        listingStore.createIndex('by_category', 'category', { unique: false });
+      if (!db.objectStoreNames.contains('users')) {
+        const usersStore = db.createObjectStore('users', { keyPath: 'id' });
+        usersStore.createIndex('peerId', 'peerId', { unique: true });
       }
       
-      if (!db.objectStoreNames.contains('users')) {
-        db.createObjectStore('users', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('listings')) {
+        const listingsStore = db.createObjectStore('listings', { keyPath: 'id' });
+        listingsStore.createIndex('authorId', 'authorId', { unique: false });
       }
       
       if (!db.objectStoreNames.contains('deals')) {
-        const dealStore = db.createObjectStore('deals', { keyPath: 'id' });
-        dealStore.createIndex('by_listing', 'listingId', { unique: false });
-        dealStore.createIndex('by_parties', ['proposerId', 'receiverId'], { unique: false });
+        const dealsStore = db.createObjectStore('deals', { keyPath: 'id' });
+        dealsStore.createIndex('listingId', 'listingId', { unique: false });
+        dealsStore.createIndex('proposerId', 'proposerId', { unique: false });
+        dealsStore.createIndex('receiverId', 'receiverId', { unique: false });
       }
       
-      if (!db.objectStoreNames.contains('messages')) {
-        const messageStore = db.createObjectStore('messages', { keyPath: 'id' });
-        messageStore.createIndex('by_deal', 'dealId', { unique: false });
+      // Add comments store
+      if (!db.objectStoreNames.contains('comments')) {
+        const commentsStore = db.createObjectStore('comments', { keyPath: 'id' });
+        commentsStore.createIndex('dealId', 'dealId', { unique: false });
+        commentsStore.createIndex('authorId', 'authorId', { unique: false });
       }
     };
     
     request.onsuccess = (event) => {
       db = event.target.result;
-      console.log("Database initialized successfully");
-      resolve(db);
+      console.log('Database initialized successfully');
+      resolve();
     };
     
     request.onerror = (event) => {
-      console.error("Database error:", event.target.error);
+      console.error('Error initializing database:', event.target.error);
       reject(event.target.error);
     };
   });

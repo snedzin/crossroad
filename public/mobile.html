@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -230,6 +229,55 @@
       <div class="dialog-footer">
         <button class="btn btn-outline" id="cancelProfile">Cancel</button>
         <button class="btn btn-primary" id="saveProfile">Save Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deal View Dialog -->
+  <div class="dialog-overlay" id="dealViewDialog" data-deal-id="">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h3 class="dialog-title" id="dealViewTitle">Deal Details</h3>
+        <button class="dialog-close" id="closeDealViewDialog">&times;</button>
+      </div>
+      <div class="dialog-content">
+        <div class="deal-view-details">
+          <div class="deal-status-bar">
+            <span class="peer-badge" id="dealViewStatus">Pending</span>
+            <span class="deal-date" id="dealViewDate"></span>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Deal Partner</label>
+            <p id="dealViewParty"></p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <p id="dealViewMessage" class="deal-message"></p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Offer Amount</label>
+            <p id="dealViewOffer" class="deal-offer"></p>
+          </div>
+          
+          <div class="deal-actions" id="dealViewActions">
+            <!-- Buttons will be added dynamically -->
+          </div>
+        </div>
+        
+        <div class="deal-comments">
+          <h4>Comments</h4>
+          <div id="dealComments" class="comments-list">
+            <p class="text-center">Loading comments...</p>
+          </div>
+          
+          <div class="comment-form">
+            <textarea id="commentText" class="form-input" rows="2" placeholder="Write a comment..."></textarea>
+            <button id="submitComment" class="btn btn-primary">Send</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

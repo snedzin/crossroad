@@ -1,4 +1,3 @@
-
 // Render all listings in the listings grid
 async function renderListings(filter = 'all') {
   const grid = document.getElementById('listingsGrid');
@@ -51,7 +50,6 @@ async function renderListings(filter = 'all') {
   
   grid.innerHTML = html;
   
-  // Add click event to cards
   const cards = grid.querySelectorAll('.listing-card');
   cards.forEach(card => {
     card.addEventListener('click', () => {
@@ -96,7 +94,6 @@ async function renderUserListings() {
   
   container.innerHTML = html;
   
-  // Add click event to cards
   const cards = container.querySelectorAll('.listing-card');
   cards.forEach(card => {
     card.addEventListener('click', () => {
@@ -135,7 +132,6 @@ async function openListingDialog(listingId) {
     document.getElementById('viewListingAuthor').textContent = author.name;
     document.getElementById('viewListingDate').textContent = dateString;
     
-    // Show propose button only if listing is not by current user
     const proposeBtn = document.getElementById('proposeBtn');
     if (listing.authorId === currentUser.id) {
       proposeBtn.style.display = 'none';
@@ -176,7 +172,7 @@ async function renderDeals() {
     const dateString = new Date(deal.createdAt).toLocaleDateString();
     
     html += `
-      <div class="listing-card">
+      <div class="listing-card deal-card" data-id="${deal.id}">
         <div class="listing-header">
           <div class="listing-title">${listing.title}</div>
           <div class="listing-meta">
@@ -205,7 +201,6 @@ async function renderDeals() {
   
   container.innerHTML = html;
   
-  // Add event listeners for accept/reject buttons
   container.querySelectorAll('.accept-deal-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -217,6 +212,13 @@ async function renderDeals() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       respondToDeal(btn.dataset.id, false);
+    });
+  });
+  
+  container.querySelectorAll('.deal-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const dealId = card.dataset.id;
+      openDealDialog(dealId);
     });
   });
 }
@@ -243,7 +245,6 @@ async function respondToDeal(dealId, accepted) {
       updateRequest.onsuccess = () => {
         renderDeals();
         
-        // Notify the proposer
         const connection = connections[deal.proposerId];
         if (connection) {
           sendMessage(connection, {
@@ -274,5 +275,278 @@ async function respondToDeal(dealId, accepted) {
   } catch (err) {
     console.error('Error responding to deal:', err);
     showToast('Error', 'An error occurred while responding to the deal', 'error');
+  }
+}
+
+// Open the deal dialog to view details
+async function openDealDialog(dealId) {
+  try {
+    const transaction = db.transaction(['deals'], 'readonly');
+    const store = transaction.objectStore('deals');
+    const request = store.get(dealId);
+    
+    request.onsuccess = async () => {
+      const deal = request.result;
+      if (!deal) {
+        showToast('Error', 'Deal not found', 'error');
+        return;
+      }
+      
+      markDealAsOpened(dealId);
+      
+      const listing = await getListingById(deal.listingId);
+      if (!listing) {
+        showToast('Error', 'Listing not found', 'error');
+        return;
+      }
+      
+      const isProposer = deal.proposerId === currentUser.id;
+      const otherPartyId = isProposer ? deal.receiverId : deal.proposerId;
+      const otherParty = await getUserById(otherPartyId) || { name: 'Unknown' };
+      
+      document.getElementById('dealViewTitle').textContent = isProposer ? 
+        `Your proposal for: ${listing.title}` : 
+        `Proposal from ${otherParty.name} for: ${listing.title}`;
+      
+      document.getElementById('dealViewStatus').textContent = capitalizeFirstLetter(deal.status);
+      document.getElementById('dealViewStatus').className = `peer-badge ${
+        deal.status === 'pending' ? 'badge-warning' : 
+        deal.status === 'accepted' ? 'badge-success' : 
+        deal.status === 'rejected' ? 'badge-danger' : 'badge-info'
+      }`;
+      
+      document.getElementById('dealViewDate').textContent = formatTimestamp(deal.createdAt);
+      document.getElementById('dealViewParty').textContent = otherParty.name;
+      document.getElementById('dealViewMessage').textContent = deal.message || 'No message provided';
+      document.getElementById('dealViewOffer').textContent = `$${deal.offerAmount.toFixed(2)}`;
+      
+      const actionsContainer = document.getElementById('dealViewActions');
+      
+      if (deal.status === 'pending' && !isProposer) {
+        actionsContainer.innerHTML = `
+          <button class="btn btn-primary accept-view-deal-btn" data-id="${deal.id}">Accept Deal</button>
+          <button class="btn btn-outline reject-view-deal-btn" data-id="${deal.id}">Reject Deal</button>
+        `;
+        
+        document.querySelector('.accept-view-deal-btn').addEventListener('click', () => {
+          respondToDeal(deal.id, true);
+          document.getElementById('dealViewDialog').classList.remove('open');
+        });
+        
+        document.querySelector('.reject-view-deal-btn').addEventListener('click', () => {
+          respondToDeal(deal.id, false);
+          document.getElementById('dealViewDialog').classList.remove('open');
+        });
+      } else if (deal.status === 'accepted') {
+        actionsContainer.innerHTML = `
+          <button class="btn btn-primary complete-deal-btn" data-id="${deal.id}">Mark as Completed</button>
+        `;
+        
+        document.querySelector('.complete-deal-btn').addEventListener('click', () => {
+          completeDeal(deal.id);
+          document.getElementById('dealViewDialog').classList.remove('open');
+        });
+      } else {
+        actionsContainer.innerHTML = '';
+      }
+      
+      const commentsContainer = document.getElementById('dealComments');
+      commentsContainer.innerHTML = '<div class="loader"></div>';
+      
+      const transaction = db.transaction(['comments'], 'readonly');
+      const store = transaction.objectStore('comments');
+      const index = store.index('dealId');
+      const request = index.getAll(dealId);
+      
+      request.onsuccess = async () => {
+        const comments = request.result || [];
+        
+        if (comments.length === 0) {
+          commentsContainer.innerHTML = '<p class="text-center">No comments yet</p>';
+          return;
+        }
+        
+        comments.sort((a, b) => a.timestamp - b.timestamp);
+        
+        let html = '';
+        
+        for (const comment of comments) {
+          const author = await getUserById(comment.authorId) || { name: 'Unknown' };
+          const isCurrentUser = comment.authorId === currentUser.id;
+          const timeString = formatTimestamp(comment.timestamp);
+          
+          html += `
+            <div class="comment ${isCurrentUser ? 'comment-mine' : ''}">
+              <div class="comment-header">
+                <span class="comment-author">${author.name}</span>
+                <span class="comment-time">${timeString}</span>
+              </div>
+              <div class="comment-body">
+                ${comment.text}
+              </div>
+            </div>
+          `;
+        }
+        
+        commentsContainer.innerHTML = html;
+      };
+      
+      request.onerror = () => {
+        commentsContainer.innerHTML = '<p class="text-center">Failed to load comments</p>';
+        console.error('Error loading comments:', request.error);
+      };
+    };
+    
+    request.onerror = () => {
+      showToast('Error', 'Failed to load deal', 'error');
+    };
+  } catch (err) {
+    console.error('Error opening deal dialog:', err);
+    showToast('Error', 'An error occurred while opening the deal details', 'error');
+  }
+}
+
+// Mark a deal as completed
+async function completeDeal(dealId) {
+  try {
+    const transaction = db.transaction(['deals'], 'readwrite');
+    const store = transaction.objectStore('deals');
+    const request = store.get(dealId);
+    
+    request.onsuccess = () => {
+      const deal = request.result;
+      if (!deal) {
+        showToast('Error', 'Deal not found', 'error');
+        return;
+      }
+      
+      deal.status = 'completed';
+      deal.updatedAt = Date.now();
+      
+      const updateRequest = store.put(deal);
+      
+      updateRequest.onsuccess = () => {
+        renderDeals();
+        
+        const otherPartyId = deal.proposerId === currentUser.id ? deal.receiverId : deal.proposerId;
+        const connection = connections[otherPartyId];
+        if (connection) {
+          sendMessage(connection, {
+            type: 'DEAL_RESPONSE',
+            data: {
+              dealId,
+              status: 'completed',
+              receiverId: currentUser.id
+            }
+          });
+        }
+        
+        showToast('Deal Updated', 'Deal marked as completed', 'success');
+      };
+      
+      updateRequest.onerror = () => {
+        showToast('Error', 'Failed to update deal', 'error');
+      };
+    };
+  } catch (err) {
+    console.error('Error completing deal:', err);
+    showToast('Error', 'An error occurred while completing the deal', 'error');
+  }
+}
+
+// Load and display comments for a deal
+async function loadDealComments(dealId) {
+  try {
+    const commentsContainer = document.getElementById('dealComments');
+    commentsContainer.innerHTML = '<div class="loader"></div>';
+    
+    const transaction = db.transaction(['comments'], 'readonly');
+    const store = transaction.objectStore('comments');
+    const index = store.index('dealId');
+    const request = index.getAll(dealId);
+    
+    request.onsuccess = async () => {
+      const comments = request.result || [];
+      
+      if (comments.length === 0) {
+        commentsContainer.innerHTML = '<p class="text-center">No comments yet</p>';
+        return;
+      }
+      
+      comments.sort((a, b) => a.timestamp - b.timestamp);
+      
+      let html = '';
+      
+      for (const comment of comments) {
+        const author = await getUserById(comment.authorId) || { name: 'Unknown' };
+        const isCurrentUser = comment.authorId === currentUser.id;
+        const timeString = formatTimestamp(comment.timestamp);
+        
+        html += `
+          <div class="comment ${isCurrentUser ? 'comment-mine' : ''}">
+            <div class="comment-header">
+              <span class="comment-author">${author.name}</span>
+              <span class="comment-time">${timeString}</span>
+            </div>
+            <div class="comment-body">
+              ${comment.text}
+            </div>
+          </div>
+        `;
+      }
+      
+      commentsContainer.innerHTML = html;
+    };
+    
+    request.onerror = () => {
+      commentsContainer.innerHTML = '<p class="text-center">Failed to load comments</p>';
+      console.error('Error loading comments:', request.error);
+    };
+  } catch (err) {
+    console.error('Error loading comments:', err);
+    document.getElementById('dealComments').innerHTML = 
+      '<p class="text-center">An error occurred while loading comments</p>';
+  }
+}
+
+// Add a comment to a deal
+async function addComment(dealId, text) {
+  if (!text.trim()) {
+    showToast('Error', 'Comment cannot be empty', 'error');
+    return;
+  }
+  
+  try {
+    const comment = {
+      id: generateUUID(),
+      dealId,
+      authorId: currentUser.id,
+      text,
+      timestamp: Date.now()
+    };
+    
+    const transaction = db.transaction(['comments'], 'readwrite');
+    const store = transaction.objectStore('comments');
+    const request = store.add(comment);
+    
+    request.onsuccess = () => {
+      document.getElementById('commentText').value = '';
+      loadDealComments(dealId);
+      
+      const connection = connections[dealId];
+      if (connection) {
+        sendMessage(connection, {
+          type: 'COMMENT_ADDED',
+          data: { comment }
+        });
+      }
+    };
+    
+    request.onerror = () => {
+      showToast('Error', 'Failed to add comment', 'error');
+    };
+  } catch (err) {
+    console.error('Error adding comment:', err);
+    showToast('Error', 'An error occurred while adding the comment', 'error');
   }
 }

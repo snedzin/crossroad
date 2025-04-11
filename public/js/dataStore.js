@@ -1,4 +1,3 @@
-
 // Data storage and manipulation functions
 
 // Get all listings (local + external)
@@ -35,6 +34,18 @@ function getDealById(id) {
   
   const externalDealsMap = window.externalDeals || new Map();
   return externalDealsMap.get(id) || null;
+}
+
+// Update a deal in storage
+async function updateDeal(deal) {
+  const transaction = db.transaction(['deals'], 'readwrite');
+  const store = transaction.objectStore('deals');
+  
+  return new Promise((resolve, reject) => {
+    const request = store.put(deal);
+    request.onsuccess = () => resolve(deal);
+    request.onerror = () => reject(request.error);
+  });
 }
 
 // Mark a deal as opened

@@ -140,12 +140,48 @@ async function handleMessage(message, connection) {
         
       case 'DEAL_RESPONSE':
         if (message.data) {
-          const { dealId, accepted } = message.data;
-          showToast(
-            'Deal Update', 
-            accepted ? 'Your deal was accepted!' : 'Your deal was rejected', 
-            accepted ? 'success' : 'error'
-          );
+          const { dealId, accepted, status } = message.data;
+          
+          if (status === 'completed') {
+            showToast('Deal Update', 'Deal marked as completed', 'success');
+          } else {
+            showToast(
+              'Deal Update', 
+              accepted ? 'Your deal was accepted!' : 'Your deal was rejected', 
+              accepted ? 'success' : 'error'
+            );
+          }
+          
+          // Update local deal if we have it
+          const deal = await getDealById(dealId);
+          if (deal) {
+            deal.status = accepted ? 'accepted' : (status || 'rejected');
+            deal.updatedAt = Date.now();
+            await updateDeal(deal);
+            renderDeals();
+          }
+        }
+        break;
+        
+      case 'COMMENT_ADDED':
+        if (message.data && message.data.comment) {
+          const comment = message.data.comment;
+          
+          // Save the comment
+          const transaction = db.transaction(['comments'], 'readwrite');
+          const store = transaction.objectStore('comments');
+          await store.add(comment);
+          
+          // Update UI if the deal dialog is open
+          const dealViewDialog = document.getElementById('dealViewDialog');
+          if (dealViewDialog.classList.contains('open')) {
+            const currentDealId = dealViewDialog.dataset.dealId;
+            if (currentDealId === comment.dealId) {
+              loadDealComments(comment.dealId);
+            }
+          }
+          
+          showToast('New Comment', 'You received a new comment on a deal', 'info');
         }
         break;
         

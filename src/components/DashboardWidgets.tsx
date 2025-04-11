@@ -19,7 +19,12 @@ const DashboardWidgets = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <RecentDealsWidget />
-        {/* Additional dashboard widgets can be added here */}
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+          <h3 className="text-lg font-semibold mb-3">Connected Peers</h3>
+          <div className="text-sm text-muted-foreground">
+            Connect with other peers to discover more deals and share your own.
+          </div>
+        </div>
       </div>
     </div>
   );

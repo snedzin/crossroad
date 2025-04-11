@@ -8,7 +8,8 @@ import {
   DialogHeader, 
   DialogTitle,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { usePeerStore } from "@/stores/peerStore";
@@ -19,7 +20,7 @@ const PeerConnectButton = () => {
   const [peerId, setPeerId] = useState("");
   const [connecting, setConnecting] = useState(false);
   const { toast } = useToast();
-  const { connectToPeer, myPeerId } = usePeerStore();
+  const { connectToPeer, myPeerId, connectedPeers } = usePeerStore();
   
   const handleConnect = async () => {
     if (!peerId.trim()) return;
@@ -64,6 +65,9 @@ const PeerConnectButton = () => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Connect to Peer</DialogTitle>
+          <DialogDescription>
+            Connect to other peers to share deals and synchronize data
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {myPeerId && (
@@ -73,6 +77,20 @@ const PeerConnectButton = () => {
               <p className="text-xs text-gray-500 mt-1">Share this ID with others to let them connect to you</p>
             </div>
           )}
+          
+          {connectedPeers.length > 0 && (
+            <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+              <h3 className="text-sm font-semibold mb-1">Connected Peers ({connectedPeers.length})</h3>
+              <div className="max-h-24 overflow-y-auto">
+                {connectedPeers.map((peer, index) => (
+                  <div key={index} className="text-xs font-mono break-all mb-1 flex items-center justify-between">
+                    <span>{peer.substring(0, 16)}...</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="peerId" className="text-right text-sm">
               Peer ID

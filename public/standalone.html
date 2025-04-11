@@ -10,699 +10,59 @@
   <!-- Add a retro font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Special+Elite&display=swap">
   <style>
-    /* Reset and base styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ... keep existing code (base styles, layout, colors, animations) */
     
-    :root {
-      --bg-primary: #0a0a0a;
-      --bg-secondary: #121212;
-      --bg-tertiary: #1a1a1a;
-      --text-primary: #e0e0e0;
-      --text-secondary: #a0a0a0;
-      --text-muted: #707070;
-      --accent-primary: #b30000;
-      --accent-secondary: #ff3333;
-      --accent-tertiary: #ff6666;
-      --border-color: #333333;
-      --shadow-color: rgba(0, 0, 0, 0.5);
-      --retro-glow: 0 0 5px rgba(255, 0, 0, 0.7);
-    }
-    
-    @keyframes flicker {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.95; }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-    
-    @keyframes redGlow {
-      0%, 100% { text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
-      50% { text-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
-    }
-    
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: 'Special Elite', monospace;
-      line-height: 1.6;
-      background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23222222' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H5V0zm1 5v1H5v-1H0V0h1v5h5z'/%3E%3C/g%3E%3C/svg%3E");
-    }
-    
-    /* Layout */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      background-color: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 1px 10px var(--shadow-color);
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .logo h1 {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 1.25rem;
-      animation: redGlow 4s infinite;
-    }
-    
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      fill: var(--accent-primary);
-    }
-    
-    .main {
-      padding: 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    /* Board UI */
-    .board {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    
-    .card {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      border-radius: 0.25rem;
-      overflow: hidden;
-      box-shadow: 0 4px 8px var(--shadow-color);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 1px solid var(--border-color);
-      position: relative;
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px var(--shadow-color), 0 0 5px var(--accent-tertiary);
-    }
-    
-    .card-img {
-      height: 150px;
-      background-color: var(--bg-secondary);
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .card-content {
-      padding: 1rem;
-    }
-    
-    .card-content h3 {
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .card-content p {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin: 0.5rem 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.5rem;
-      padding-top: 0.5rem;
-      border-top: 1px dashed var(--border-color);
-    }
-    
-    .price {
-      font-weight: 600;
-      color: var(--accent-secondary);
-    }
-    
-    .time {
-      font-size: 0.75rem;
+    /* New styles for peer IDs and connections */
+    .peer-author {
+      font-size: 0.7rem;
       color: var(--text-muted);
-    }
-    
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      border-radius: 3px;
-      background-color: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-    }
-    
-    /* Filter controls */
-    .filter-controls {
+      margin-top: 0.25rem;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      gap: 0.75rem;
-      padding: 1rem;
-      background-color: var(--bg-secondary);
-      border-radius: 0.25rem;
-      border: 1px solid var(--border-color);
+      gap: 0.25rem;
     }
     
-    .category-selector {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    
-    .category-badge {
-      padding: 0.25rem 0.75rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--text-primary);
+    .peer-connect-btn {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
       background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
       border-radius: 3px;
+      color: var(--accent-secondary);
       cursor: pointer;
-      transition: all 0.2s ease;
-      opacity: 0.7;
-      border: 1px solid var(--border-color);
+      margin-left: 0.25rem;
     }
     
-    .category-badge.selected {
-      opacity: 1;
-      transform: scale(1.05);
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 5px var(--accent-tertiary);
+    .peer-connect-btn:hover {
+      background-color: var(--accent-primary);
+      color: white;
     }
     
-    .category-badge.all {
-      background-color: var(--bg-tertiary);
+    .opened-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: var(--accent-primary);
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      opacity: 0.8;
     }
     
-    .category-badge.goods {
-      background-color: var(--bg-tertiary);
-      border-left: 3px solid #ff3333;
-    }
-    
-    .category-badge.services {
-      background-color: var(--bg-tertiary);
-      border-left: 3px solid #9933ff;
-    }
-    
-    .category-badge.housing {
-      background-color: var(--bg-tertiary);
-      border-left: 3px solid #3399ff;
-    }
-    
-    .category-badge.jobs {
-      background-color: var(--bg-tertiary);
-      border-left: 3px solid #33cc66;
-    }
-    
-    .category-badge.community {
-      background-color: var(--bg-tertiary);
-      border-left: 3px solid #ff9933;
-    }
-    
-    .search-box {
-      display: flex;
-      align-items: center;
-      flex: 1;
-      max-width: 400px;
-    }
-    
-    .search-box input {
-      padding: 0.5rem 0.75rem;
-      border-radius: 3px 0 0 3px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      outline: none;
-      width: 100%;
-      font-family: inherit;
-    }
-    
-    .search-box input::placeholder {
+    .timestamp {
+      display: block;
+      font-size: 0.65rem;
       color: var(--text-muted);
+      margin-top: 0.25rem;
     }
     
-    .search-box button {
-      padding: 0.5rem 0.75rem;
-      border-radius: 0 3px 3px 0;
-      border: 1px solid var(--border-color);
-      border-left: none;
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      cursor: pointer;
-    }
-    
-    /* Buttons */
-    button {
-      padding: 0.5rem 1rem;
-      border-radius: 3px;
-      border: 1px solid var(--border-color);
-      background-color: var(--accent-primary);
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 500;
-      font-family: inherit;
-    }
-    
-    button:hover {
-      background-color: var(--accent-secondary);
-    }
-    
-    button:disabled {
-      background-color: var(--bg-tertiary);
-      cursor: not-allowed;
-      opacity: 0.7;
-    }
-    
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-    
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .modal.active {
-      display: flex;
-    }
-    
-    .modal-content {
-      background-color: var(--bg-secondary);
-      border-radius: 0.25rem;
-      border: 1px solid var(--border-color);
-      max-width: 500px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 0 20px var(--shadow-color), 0 0 10px var(--accent-tertiary);
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      background-color: var(--bg-tertiary);
-    }
-    
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0;
-      color: var(--accent-secondary);
-    }
-    
-    .close-button {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0;
-      color: var(--text-primary);
-    }
-    
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border-radius: 3px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      outline: none;
-      font-family: inherit;
-    }
-    
-    .form-group textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    
-    form {
-      padding: 1rem;
-    }
-    
-    /* Toast notifications */
-    .toast-container {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    
-    .toast {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      padding: 0.75rem 1rem;
-      border-radius: 3px;
-      border-left: 4px solid var(--accent-primary);
-      box-shadow: 0 4px 6px var(--shadow-color);
-      animation: slideIn 0.3s ease-in-out;
-      max-width: 300px;
-    }
-    
-    .toast.hiding {
-      animation: slideOut 0.3s ease-in-out forwards;
-    }
-    
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    
-    @keyframes slideOut {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-    }
-    
-    /* Message */
-    .message {
-      text-align: center;
-      padding: 2rem;
-      background-color: var(--bg-secondary);
-      border-radius: 0.25rem;
-      border: 1px solid var(--border-color);
-    }
-    
-    .message h2 {
-      margin-bottom: 0.5rem;
-      font-size: 1.5rem;
-      color: var(--accent-secondary);
-    }
-    
-    .message p {
-      color: var(--text-secondary);
-    }
-    
-    /* Additional styles for P2P functionality */
-    .peer-status {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background-color: var(--bg-secondary);
-      border-radius: 0.25rem;
-      border: 1px solid var(--border-color);
-    }
-    
-    .status-indicator {
-      height: 10px;
-      width: 10px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
-    }
-    
-    .status-connected {
-      background-color: var(--accent-secondary);
-      box-shadow: 0 0 10px var(--accent-tertiary);
-      animation: pulse 2s infinite;
-    }
-    
-    .status-disconnected {
-      background-color: #333333;
-    }
-    
-    .peer-id {
-      font-family: monospace;
-      padding: 0.25rem 0.5rem;
-      background-color: var(--bg-tertiary);
-      border-radius: 3px;
-      margin: 0 0.5rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
-      display: inline-block;
-      vertical-align: middle;
-      border: 1px solid var(--border-color);
-    }
-    
-    .copy-button {
-      background-color: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 0.25rem 0.5rem;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
-    
-    .copy-button:hover {
-      background-color: var(--bg-secondary);
-      border-color: var(--accent-primary);
-    }
-    
-    .peer-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    
-    .peer-controls input {
-      flex: 1;
-      min-width: 200px;
-      padding: 0.5rem;
-      border-radius: 3px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      font-family: inherit;
-    }
-    
-    .peer-list {
-      margin-top: 1rem;
-      background-color: var(--bg-secondary);
-      border-radius: 0.25rem;
-      padding: 0.5rem;
-      max-height: 150px;
-      overflow-y: auto;
-      border: 1px solid var(--border-color);
-    }
-    
-    .peer-item {
-      display: flex;
-      align-items: center;
-      padding: 0.5rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .peer-item:last-child {
-      border-bottom: none;
-    }
-    
-    .p2p-tab-container {
-      margin-bottom: 1rem;
-    }
-    
-    .p2p-tabs {
-      display: flex;
-      border-bottom: 2px solid var(--border-color);
-      margin-bottom: 1rem;
-    }
-    
-    .p2p-tab {
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      opacity: 0.7;
-      font-weight: 500;
-      position: relative;
-    }
-    
-    .p2p-tab.active {
-      opacity: 1;
-      color: var(--accent-secondary);
-    }
-    
-    .p2p-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: var(--accent-primary);
-    }
-    
-    .p2p-tab-content {
-      display: none;
-    }
-    
-    .p2p-tab-content.active {
-      display: block;
-    }
-    
-    /* Retro & Old-school Americana additions */
-    .vintage-texture {
-      position: relative;
-    }
-    
-    .vintage-texture::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23333333' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/svg%3E");
-      pointer-events: none;
-      opacity: 0.2;
-    }
-    
-    .retro-scanlines {
-      position: relative;
-    }
-    
-    .retro-scanlines::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        to bottom,
-        transparent 50%,
-        rgba(0, 0, 0, 0.1) 51%
-      );
-      background-size: 100% 4px;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.15;
-    }
-    
-    .crt-flicker {
-      animation: flicker 0.3s infinite;
-    }
-    
-    /* Category colors */
-    .category-goods {
-      border-left: 3px solid #ff3333;
-    }
-    
-    .category-services {
-      border-left: 3px solid #9933ff;
-    }
-    
-    .category-housing {
-      border-left: 3px solid #3399ff;
-    }
-    
-    .category-jobs {
-      border-left: 3px solid #33cc66;
-    }
-    
-    .category-community {
-      border-left: 3px solid #ff9933;
-    }
-    
-    /* Mobile responsive improvements */
+    /* Mobile responsiveness improvements */
     @media (max-width: 640px) {
-      .peer-controls {
-        flex-direction: column;
-      }
+      /* ... keep existing code (mobile responsiveness) */
       
-      .peer-id {
-        max-width: 150px;
-      }
-      
-      .header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-      }
-      
-      .header > div {
-        width: 100%;
-      }
-      
-      .header button {
-        width: 100%;
-      }
-      
-      .board {
-        grid-template-columns: 1fr;
-      }
-      
-      .filter-controls {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .search-box {
-        width: 100%;
-        max-width: none;
-      }
-      
-      .search-box input {
-        flex: 1;
-      }
-      
-      .logo h1 {
-        font-size: 1rem;
+      .peer-author {
+        flex-wrap: wrap;
       }
     }
   </style>
@@ -828,6 +188,19 @@
     </div>
   </div>
 
+  <!-- Deal View Modal -->
+  <div class="modal" id="deal-view-modal">
+    <div class="modal-content vintage-texture">
+      <div class="modal-header">
+        <h2 class="modal-title" id="deal-view-title">Deal Details</h2>
+        <button class="close-button" id="close-deal-view-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="deal-view-content" style="padding: 1rem;">
+        <!-- Deal content will be populated by JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
   
@@ -841,6 +214,7 @@
         this.onPeerConnected = null;
         this.onPeerDisconnected = null;
         this.onListingReceived = null;
+        this.onDealReceived = null;
         this.userId = this.generateId();
       }
       
@@ -925,6 +299,9 @@
           
           // Send a hello message
           this.sendHello(conn.peer);
+          
+          // Request sync of all data
+          this.requestDataSync(conn.peer);
         });
         
         conn.on('data', (data) => {
@@ -1034,8 +411,23 @@
             break;
           case 'LISTING_BROADCAST':
             if (this.onListingReceived) {
+              // Add authorship data
+              message.listing.peerId = message.listing.peerId || message.senderId;
               this.onListingReceived(message.listing);
             }
+            break;
+          case 'DEAL_BROADCAST':
+            if (this.onDealReceived) {
+              // Add authorship data
+              message.deal.peerId = message.deal.peerId || message.senderId;
+              this.onDealReceived(message.deal);
+            }
+            break;
+          case 'DATA_SYNC_REQUEST':
+            this.handleDataSyncRequest(connection.peer);
+            break;
+          case 'DATA_SYNC_RESPONSE':
+            this.handleDataSyncResponse(message, connection);
             break;
         }
       }
@@ -1060,14 +452,96 @@
         return this.sendToPeer(peerId, message);
       }
       
+      // Request full data sync from a peer
+      requestDataSync(peerId) {
+        const message = {
+          type: 'DATA_SYNC_REQUEST',
+          senderId: this.peerId,
+          timestamp: Date.now(),
+          messageId: this.generateId()
+        };
+        
+        console.log("Requesting data sync from:", peerId);
+        return this.sendToPeer(peerId, message);
+      }
+      
+      // Handle data sync request from a peer
+      handleDataSyncRequest(peerId) {
+        // Send all our listings and deals
+        const allListings = getAllListings();
+        const allDeals = getAllDeals();
+        
+        const message = {
+          type: 'DATA_SYNC_RESPONSE',
+          senderId: this.peerId,
+          timestamp: Date.now(),
+          messageId: this.generateId(),
+          data: {
+            listings: allListings,
+            deals: allDeals
+          }
+        };
+        
+        console.log("Sending data sync to:", peerId, message);
+        return this.sendToPeer(peerId, message);
+      }
+      
+      // Handle incoming data sync from a peer
+      handleDataSyncResponse(message, connection) {
+        console.log("Received data sync from:", connection.peer, message.data);
+        
+        // Process listings
+        if (message.data.listings && Array.isArray(message.data.listings)) {
+          message.data.listings.forEach(listing => {
+            // Add peer ID if not present
+            listing.peerId = listing.peerId || message.senderId;
+            
+            if (this.onListingReceived) {
+              this.onListingReceived(listing);
+            }
+          });
+        }
+        
+        // Process deals
+        if (message.data.deals && Array.isArray(message.data.deals)) {
+          message.data.deals.forEach(deal => {
+            // Add peer ID if not present
+            deal.peerId = deal.peerId || message.senderId;
+            
+            if (this.onDealReceived) {
+              this.onDealReceived(deal);
+            }
+          });
+        }
+      }
+      
       // Broadcast a listing to all peers
       broadcastListing(listing) {
+        // Ensure listing has peerId
+        listing.peerId = listing.peerId || this.peerId;
+        
         const message = {
           type: 'LISTING_BROADCAST',
           senderId: this.peerId,
           timestamp: Date.now(),
           messageId: this.generateId(),
           listing: listing
+        };
+        
+        this.broadcast(message);
+      }
+      
+      // Broadcast a deal to all peers
+      broadcastDeal(deal) {
+        // Ensure deal has peerId
+        deal.peerId = deal.peerId || this.peerId;
+        
+        const message = {
+          type: 'DEAL_BROADCAST',
+          senderId: this.peerId,
+          timestamp: Date.now(),
+          messageId: this.generateId(),
+          deal: deal
         };
         
         this.broadcast(message);
@@ -1113,10 +587,16 @@
       const searchButton = document.getElementById('search-button');
       const p2pTabs = document.querySelectorAll('.p2p-tab');
       const p2pTabContents = document.querySelectorAll('.p2p-tab-content');
+      const dealViewModal = document.getElementById('deal-view-modal');
+      const closeDealViewBtn = document.getElementById('close-deal-view-btn');
+      const dealViewTitle = document.getElementById('deal-view-title');
+      const dealViewContent = document.getElementById('deal-view-content');
       
-      // Listings storage
+      // Listings and deals storage
       let listings = JSON.parse(localStorage.getItem('crossroadListings') || '[]');
+      let deals = JSON.parse(localStorage.getItem('crossroadDeals') || '[]');
       const externalListings = new Map();
+      const externalDeals = new Map();
       
       // Initialize peer connection
       initializePeer();
@@ -1136,38 +616,66 @@
             listing: listing
           });
         });
+        
+        // Share our deals with the new peer
+        deals.forEach(deal => {
+          p2pService.sendToPeer(peerId, {
+            type: 'DEAL_BROADCAST',
+            senderId: p2pService.peerId,
+            timestamp: Date.now(),
+            messageId: p2pService.generateId(),
+            deal: deal
+          });
+        });
       };
       
       p2pService.onPeerDisconnected = (peerId) => {
         updatePeerList();
         showToast(`Disconnected from: ${peerId.substring(0, 8)}...`);
         
-        // Remove the peer's listings
-        const updatedExternalListings = new Map();
-        externalListings.forEach((listing, id) => {
-          if (listing.peerId !== peerId) {
-            updatedExternalListings.set(id, listing);
-          }
-        });
+        // We don't remove external listings/deals on disconnection
+        // This implements the persistent data model where data stays in the network
+      };
+      
+      p2pService.onListingReceived = (listing) => {
+        // Add peer ID to the listing if not present
+        listing.peerId = listing.peerId || p2pService.peerId;
+        listing.external = true;
         
-        if (externalListings.size !== updatedExternalListings.size) {
-          externalListings.clear();
-          updatedExternalListings.forEach((listing, id) => {
-            externalListings.set(id, listing);
-          });
+        // Don't duplicate if we already have the same listing ID
+        if (!hasListing(listing.id)) {
+          externalListings.set(listing.id, listing);
+          showToast(`New offering received: ${listing.title}`);
           renderListings();
         }
       };
       
-      p2pService.onListingReceived = (listing) => {
-        // Add peer ID to the listing
-        listing.peerId = listing.peerId || p2pService.peerId; // Use sender's peer ID if not provided
-        listing.external = true;
+      p2pService.onDealReceived = (deal) => {
+        // Add peer ID to the deal if not present
+        deal.peerId = deal.peerId || p2pService.peerId;
+        deal.external = true;
         
-        externalListings.set(listing.id, listing);
-        showToast(`New offering received: ${listing.title}`);
-        renderListings();
+        // Don't duplicate if we already have the same deal ID
+        if (!hasDeal(deal.id)) {
+          externalDeals.set(deal.id, deal);
+          showToast(`New deal received: ${deal.title}`);
+          renderListings(); // Refresh listings which may include deals
+        }
       };
+      
+      // Check if we already have a listing with the given ID
+      function hasListing(id) {
+        const localHas = listings.some(listing => listing.id === id);
+        const externalHas = externalListings.has(id);
+        return localHas || externalHas;
+      }
+      
+      // Check if we already have a deal with the given ID
+      function hasDeal(id) {
+        const localHas = deals.some(deal => deal.id === id);
+        const externalHas = externalDeals.has(id);
+        return localHas || externalHas;
+      }
       
       // Initialize peer connection
       async function initializePeer() {
@@ -1240,6 +748,138 @@
         return allListings;
       }
       
+      // Get all deals (local + external)
+      function getAllDeals() {
+        const allDeals = [...deals];
+        
+        externalDeals.forEach(deal => {
+          allDeals.push(deal);
+        });
+        
+        return allDeals;
+      }
+      
+      // Get a deal by ID
+      function getDealById(id) {
+        const localDeal = deals.find(deal => deal.id === id);
+        if (localDeal) return localDeal;
+        
+        return externalDeals.get(id) || null;
+      }
+      
+      // Mark a deal as opened
+      function markDealAsOpened(id) {
+        // Find deal in local storage
+        const localIndex = deals.findIndex(deal => deal.id === id);
+        if (localIndex !== -1) {
+          deals[localIndex].opened = true;
+          deals[localIndex].lastOpenedAt = new Date().toISOString();
+          localStorage.setItem('crossroadDeals', JSON.stringify(deals));
+          
+          // Also broadcast the updated deal
+          p2pService.broadcastDeal(deals[localIndex]);
+          return;
+        }
+        
+        // Check external deals
+        if (externalDeals.has(id)) {
+          const deal = externalDeals.get(id);
+          deal.opened = true;
+          deal.lastOpenedAt = new Date().toISOString();
+          externalDeals.set(id, deal);
+          
+          // Also broadcast the updated deal
+          p2pService.broadcastDeal(deal);
+        }
+      }
+      
+      // Display deal details
+      function viewDeal(dealId) {
+        const deal = getDealById(dealId);
+        if (!deal) return;
+        
+        // Mark the deal as opened
+        markDealAsOpened(dealId);
+        
+        // Update modal content
+        dealViewTitle.textContent = deal.title;
+        
+        // Format the content
+        const peerIdDisplay = deal.peerId ? 
+          `<p class="peer-author">
+            <span>Author: ${deal.peerId.substring(0, 8)}...</span>
+            <button class="peer-connect-btn" data-peer-id="${deal.peerId}">Connect</button>
+           </p>` : '';
+        
+        const dealTime = deal.time || 'Unknown time';
+        const lastOpenedText = deal.lastOpenedAt ? 
+          `<span class="timestamp">Last viewed: ${formatTimestamp(deal.lastOpenedAt)}</span>` : '';
+        
+        dealViewContent.innerHTML = `
+          <div>
+            <p>${deal.description}</p>
+            <p class="price" style="margin-top: 1rem;"><strong>Price:</strong> ${deal.price}</p>
+            <p style="margin-top: 0.5rem;"><strong>Contact:</strong> ${deal.contact || 'No contact provided'}</p>
+            ${peerIdDisplay}
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+              <span class="timestamp">Posted: ${dealTime}</span>
+              ${lastOpenedText}
+            </div>
+          </div>
+        `;
+        
+        // Add event listener to connect buttons
+        dealViewContent.querySelectorAll('.peer-connect-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const peerId = btn.getAttribute('data-peer-id');
+            if (peerId) {
+              connectToPeerFromButton(peerId);
+            }
+          });
+        });
+        
+        // Show the modal
+        dealViewModal.classList.add('active');
+      }
+      
+      // Helper to connect to peer from button click
+      async function connectToPeerFromButton(peerId) {
+        if (!peerId || peerId === p2pService.peerId) return;
+        
+        const success = await p2pService.connectToPeer(peerId);
+        if (success) {
+          showToast(`Connected to peer: ${peerId.substring(0, 8)}...`);
+          updatePeerList();
+        } else {
+          showToast(`Failed to connect to: ${peerId.substring(0, 8)}...`, 'error');
+        }
+      }
+      
+      // Format timestamp for display
+      function formatTimestamp(timestamp) {
+        if (!timestamp) return 'Unknown';
+        
+        try {
+          const date = new Date(timestamp);
+          return date.toLocaleString();
+        } catch (error) {
+          return 'Invalid date';
+        }
+      }
+      
+      // Close deal view modal
+      closeDealViewBtn.addEventListener('click', () => {
+        dealViewModal.classList.remove('active');
+      });
+      
+      // Close deal view when clicking outside
+      dealViewModal.addEventListener('click', (e) => {
+        if (e.target === dealViewModal) {
+          dealViewModal.classList.remove('active');
+        }
+      });
+      
       // Render listings with filters
       function renderListings(filter = 'all', searchQuery = '') {
         listingBoard.innerHTML = '';
@@ -1268,6 +908,17 @@
           card.className = 'card';
           
           const isExternal = listing.external === true;
+          const isOpened = listing.opened === true;
+          
+          // Create peer ID display with connect button
+          const peerElement = listing.peerId ? 
+            `<div class="peer-author">
+              <span>Author: ${listing.peerId.substring(0, 8)}...</span>
+              <button class="peer-connect-btn" data-peer-id="${listing.peerId}">Connect</button>
+             </div>` : '';
+          
+          // Add opened badge if the listing has been viewed
+          const openedBadge = isOpened ? '<div class="opened-badge">Viewed</div>' : '';
           
           card.innerHTML = `
             <div class="card-img">No Image</div>
@@ -1276,17 +927,31 @@
                 ${capitalizeFirstLetter(listing.category)}
                 ${isExternal ? '<span style="margin-left: 4px;">• Remote</span>' : ''}
               </div>
+              ${openedBadge}
               <h3>${listing.title}</h3>
               <p>${listing.description}</p>
               <div class="card-footer">
                 <span class="price">${listing.price}</span>
                 <span class="time">${listing.time || 'Just now'}</span>
               </div>
+              ${peerElement}
             </div>
           `;
           
+          // Add event listeners
           card.addEventListener('click', () => {
-            showToast(`Contact for "${listing.title}": ${listing.contact || 'No contact info provided'}`);
+            viewDeal(listing.id);
+          });
+          
+          // Add event listener to connect buttons (prevent propagation)
+          card.querySelectorAll('.peer-connect-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const peerId = btn.getAttribute('data-peer-id');
+              if (peerId) {
+                connectToPeerFromButton(peerId);
+              }
+            });
           });
           
           listingBoard.appendChild(card);
@@ -1420,22 +1085,24 @@
       listingForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const newListing = {
+        const newDeal = {
           id: Date.now().toString(),
           title: document.getElementById('listing-title').value,
           description: document.getElementById('listing-description').value,
           price: document.getElementById('listing-price').value,
           category: selectedCategoryInput.value,
           contact: document.getElementById('listing-contact').value,
-          time: 'Just now'
+          time: 'Just now',
+          peerId: p2pService.peerId,
+          createdAt: new Date().toISOString()
         };
         
-        // Save to local storage
-        listings.push(newListing);
-        localStorage.setItem('crossroadListings', JSON.stringify(listings));
+        // Save to local storage as a deal
+        deals.push(newDeal);
+        localStorage.setItem('crossroadDeals', JSON.stringify(deals));
         
         // Broadcast to peers
-        p2pService.broadcastListing(newListing);
+        p2pService.broadcastDeal(newDeal);
         
         // Reset form and close modal
         listingForm.reset();

@@ -4,26 +4,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crossroad - P2P Deals</title>
+  <title>Peer Board Buzz - Standalone P2P</title>
   <!-- Include PeerJS directly -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <!-- Add a retro font -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Special+Elite&display=swap">
-  <!-- Include our CSS and JS files -->
+  <!-- Include modular CSS -->
   <link rel="stylesheet" href="css/standalone.css">
 </head>
-<body class="retro-scanlines">
+<body>
   <div class="header">
-    <div class="logo">
-      <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="3" x2="12" y2="15"></line>
-        <line x1="6" y1="9" x2="18" y2="9"></line>
-        <path d="M19 17v.6a2.4 2.4 0 0 1-2.4 2.4H7.4A2.4 2.4 0 0 1 5 17.6V17"></path>
-      </svg>
-      <h1>CROSSROAD</h1>
+    <div>
+      <h1>Peer Board Buzz</h1>
     </div>
     <div>
-      <button id="create-listing-btn">Make a Deal</button>
+      <button id="create-listing-btn">Create Listing</button>
     </div>
   </div>
   
@@ -31,13 +24,13 @@
     <!-- P2P Connection UI -->
     <div class="p2p-tab-container">
       <div class="p2p-tabs">
-        <div class="p2p-tab active" data-tab="listings">Offerings</div>
+        <div class="p2p-tab active" data-tab="listings">Listings</div>
         <div class="p2p-tab" data-tab="connections">Connections</div>
       </div>
       
       <div class="p2p-tab-content active" id="listings-tab">
         <!-- Listings will be added here by JS -->
-        <div class="filter-controls vintage-texture">
+        <div class="filter-controls">
           <div class="category-selector" id="filter-categories">
             <div class="category-badge all selected" data-category="all">All</div>
             <div class="category-badge goods" data-category="goods">Goods</div>
@@ -48,7 +41,7 @@
           </div>
           
           <div class="search-box">
-            <input type="text" id="search-input" placeholder="Search offerings...">
+            <input type="text" id="search-input" placeholder="Search listings...">
             <button id="search-button">🔍</button>
           </div>
         </div>
@@ -56,14 +49,14 @@
         <div class="board" id="listing-board">
           <!-- Listings will be added here by JS -->
           <div class="message" style="grid-column: 1 / -1;">
-            <h2>Welcome to Crossroad</h2>
-            <p>Make a deal - get anything you desire. Connect with peers or create your own listing.</p>
+            <h2>Welcome to Peer Board Buzz</h2>
+            <p>Connect with peers to see their listings or create your own!</p>
           </div>
         </div>
       </div>
       
       <div class="p2p-tab-content" id="connections-tab">
-        <div class="peer-status vintage-texture">
+        <div class="peer-status">
           <div id="status-indicator" class="status-indicator status-disconnected"></div>
           <div>
             <strong>Your Peer ID:</strong> 
@@ -75,11 +68,11 @@
         
         <div class="peer-controls">
           <input type="text" id="peer-id-input" placeholder="Enter peer ID to connect...">
-          <button id="connect-button" disabled>Connect</button>
+          <button id="connect-button" disabled>Connect to Peer</button>
         </div>
         
         <div>
-          <h3>Connected Souls</h3>
+          <h3>Connected Peers</h3>
           <div id="peer-list" class="peer-list">
             <div class="peer-item">No connected peers</div>
           </div>
@@ -90,14 +83,14 @@
 
   <!-- Create Listing Modal -->
   <div class="modal" id="create-listing-modal">
-    <div class="modal-content vintage-texture">
+    <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">Make Your Offering</h2>
+        <h2 class="modal-title">Create New Listing</h2>
         <button class="close-button" id="close-modal-btn">&times;</button>
       </div>
       <form id="listing-form">
         <div class="form-group">
-          <label for="listing-title">Title of Offering</label>
+          <label for="listing-title">Title</label>
           <input type="text" id="listing-title" required>
         </div>
         
@@ -119,29 +112,56 @@
         </div>
         
         <div class="form-group">
-          <label for="listing-price">Price (Your Terms)</label>
-          <input type="text" id="listing-price" placeholder="$0.00 or other terms" required>
+          <label for="listing-price">Price</label>
+          <input type="text" id="listing-price" placeholder="$0.00" required>
         </div>
         
         <div class="form-group">
           <label for="listing-contact">Contact Information</label>
-          <input type="text" id="listing-contact" placeholder="How to reach you">
+          <input type="text" id="listing-contact" placeholder="Email or phone number">
         </div>
         
-        <button type="submit" id="submit-listing-btn">Seal the Deal</button>
+        <button type="submit" id="submit-listing-btn">Create Listing</button>
       </form>
     </div>
   </div>
 
   <!-- Deal View Modal -->
   <div class="modal" id="deal-view-modal">
-    <div class="modal-content vintage-texture">
+    <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title" id="deal-view-title">Deal Details</h2>
-        <button class="close-button" id="close-deal-view-btn">&times;</button>
+        <h2 class="modal-title">Deal Details</h2>
+        <button class="close-button" id="close-deal-modal-btn">&times;</button>
       </div>
-      <div class="modal-body" id="deal-view-content" style="padding: 1rem;">
-        <!-- Deal content will be populated by JS -->
+      <div class="deal-view-details">
+        <div class="deal-status-bar">
+          <span id="deal-status" class="badge">Status</span>
+          <span id="deal-date" class="deal-date">Date</span>
+        </div>
+        <div id="deal-terms" class="deal-message">
+          No terms specified
+        </div>
+        <div class="deal-offer">
+          <span id="deal-offer-text">Offer: $0.00</span>
+        </div>
+        <div class="deal-actions">
+          <button id="accept-deal-btn" class="hidden">Accept</button>
+          <button id="decline-deal-btn" class="hidden">Decline</button>
+          <button id="complete-deal-btn" class="hidden">Mark Complete</button>
+          <button id="cancel-deal-btn" class="hidden">Cancel Deal</button>
+        </div>
+      </div>
+      
+      <!-- Comments Section -->
+      <div>
+        <h3>Comments</h3>
+        <div id="comments-list" class="comments-list">
+          <div class="comment">No comments yet</div>
+        </div>
+        <div class="comment-form">
+          <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+          <button id="send-comment-btn">Send</button>
+        </div>
       </div>
     </div>
   </div>
@@ -149,10 +169,11 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
   
-  <!-- Include our JavaScript files -->
+  <!-- Include modular JavaScript -->
   <script src="js/peerService.js"></script>
   <script src="js/dataStore.js"></script>
   <script src="js/uiUtils.js"></script>
   <script src="js/app.js"></script>
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
 </body>
 </html>

@@ -29,6 +29,7 @@
   font-weight: bold;
   color: #2c3e50;
   font-size: 1.2rem;
+  margin: 16px 0;
 }
 
 .deal-actions {
@@ -86,10 +87,54 @@
 .comment-form textarea {
   flex-grow: 1;
   resize: none;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.comment-form button {
+  align-self: flex-end;
 }
 
 /* Make sure mobile dialogs are scrollable on small screens */
 .dialog {
   max-height: 90vh;
   overflow-y: auto;
+}
+
+/* Badge colors for deal statuses */
+.badge-proposed {
+  background-color: #f59e0b;
+}
+
+.badge-accepted {
+  background-color: #10b981;
+}
+
+.badge-completed {
+  background-color: #3b82f6;
+}
+
+.badge-cancelled {
+  background-color: #ef4444;
+}
+
+.badge-disputed {
+  background-color: #8b5cf6;
+}
+
+/* Additional responsive styles */
+@media (max-width: 360px) {
+  .deal-actions {
+    flex-direction: column;
+  }
+  
+  .comment-form {
+    flex-direction: column;
+  }
+  
+  .deal-status-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

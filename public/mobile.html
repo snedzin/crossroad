@@ -1,295 +1,803 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>P2P Bulletin Board</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>P2P Mobile</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <script src="https://unpkg.com/idb@7.1.1/build/umd.js"></script>
+  <!-- Include modular CSS -->
   <link rel="stylesheet" href="css/mobile.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      background-color: #4f46e5;
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .app-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .btn {
+      background-color: #6366f1;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #4f46e5;
+    }
+
+    .btn:disabled {
+      background-color: #a5a6f6;
+      cursor: not-allowed;
+    }
+
+    .content {
+      flex: 1;
+      padding: 16px;
+      margin-bottom: 56px; /* Space for tab bar */
+    }
+
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      border-top: 1px solid #e2e8f0;
+      z-index: 50;
+    }
+
+    .tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 0;
+      color: #64748b;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .tab-icon {
+      font-size: 1.25rem;
+      margin-bottom: 4px;
+    }
+
+    .tab.active {
+      color: #4f46e5;
+    }
+
+    .profile-details {
+      background-color: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .peer-id {
+      background-color: #f1f5f9;
+      padding: 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.875rem;
+      word-break: break-all;
+      margin-bottom: 8px;
+    }
+
+    .profile-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-content {
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .listing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .listing-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .listing-card:active {
+      transform: scale(0.98);
+    }
+
+    .listing-img {
+      height: 120px;
+      background-color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+    }
+
+    .listing-content {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .listing-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+
+    .listing-price {
+      color: #4f46e5;
+      font-weight: 600;
+      margin-top: auto;
+    }
+
+    .listing-category {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: white;
+    }
+
+    .peers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .peer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .peer-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .peer-name {
+      font-weight: 600;
+    }
+
+    .peer-status {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .dialog.visible {
+      display: flex;
+    }
+
+    .dialog-content {
+      background-color: white;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dialog-header {
+      padding: 16px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dialog-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .dialog-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .dialog-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .dialog-actions {
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: white;
+    }
+
+    .badge-proposed {
+      background-color: #f97316;
+    }
+
+    .badge-accepted {
+      background-color: #10b981;
+    }
+
+    .badge-completed {
+      background-color: #6366f1;
+    }
+
+    .badge-cancelled {
+      background-color: #dc2626;
+    }
+
+    .badge-disputed {
+      background-color: #7c3aed;
+    }
+
+    .category-goods {
+      background-color: #f97316;
+    }
+
+    .category-services {
+      background-color: #8b5cf6;
+    }
+
+    .category-housing {
+      background-color: #0ea5e9;
+    }
+
+    .category-jobs {
+      background-color: #10b981;
+    }
+
+    .category-community {
+      background-color: #f59e0b;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 70px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 900;
+      pointer-events: none;
+    }
+
+    .toast {
+      background-color: #1e293b;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 90%;
+      pointer-events: all;
+      animation: toast-in 0.3s ease-out forwards;
+    }
+
+    .toast.hiding {
+      animation: toast-out 0.3s ease-in forwards;
+    }
+
+    @keyframes toast-in {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes toast-out {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .no-items {
+      text-align: center;
+      padding: 32px 16px;
+      color: #64748b;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .categories-select {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .category-option {
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      color: white;
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    .category-option.selected {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .connect-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .connect-form input {
+      flex: 1;
+    }
+
+    .deals-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .deal-card {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    .deal-header {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .deal-id {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .deal-body {
+      padding: 12px;
+    }
+
+    .deal-info {
+      margin-bottom: 8px;
+    }
+
+    .deal-message {
+      font-size: 0.875rem;
+      color: #334155;
+      margin-bottom: 8px;
+      background-color: #f8fafc;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .deal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background-color: #f8fafc;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .deal-time {
+      font-style: italic;
+    }
+
+    .deal-unread {
+      position: relative;
+    }
+
+    .deal-unread::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 8px;
+      height: 8px;
+      background-color: #4f46e5;
+      border-radius: 50%;
+    }
+
+    /* Loading indicator */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .loading::after {
+      content: '';
+      width: 30px;
+      height: 30px;
+      border: 2px solid #cbd5e1;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: loading 0.8s linear infinite;
+    }
+
+    @keyframes loading {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <header class="header">
-      <div class="logo">
-        <span class="logo-icon">📋</span> P2P Bulletin Board
+  <div class="app-container">
+    <div class="header">
+      <div class="app-title">P2P Mobile</div>
+      <button id="new-listing-btn" class="btn">New Listing</button>
+    </div>
+    
+    <div class="content">
+      <!-- Content will be loaded here by JS -->
+      <div class="loading"></div>
+    </div>
+    
+    <div class="tab-bar">
+      <div class="tab active" data-tab="listings">
+        <div class="tab-icon">📦</div>
+        <div>Listings</div>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-outline" id="menuBtn">
-          Menu
-        </button>
-        <button class="btn btn-primary" id="createBtn">
-          Create Listing
-        </button>
+      <div class="tab" data-tab="deals">
+        <div class="tab-icon">🤝</div>
+        <div>Deals</div>
       </div>
-    </header>
-
-    <div class="main-content">
-      <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <h3>Menu</h3>
-          <button class="sidebar-close" id="sidebarClose">&times;</button>
-        </div>
-        <div class="sidebar-tabs">
-          <div class="sidebar-tab active" data-tab="profile">Profile</div>
-          <div class="sidebar-tab" data-tab="network">Network</div>
-          <div class="sidebar-tab" data-tab="deals">Deals</div>
-        </div>
-        <div class="sidebar-content">
-          <div class="tab-panel active" id="profilePanel">
-            <div class="user-profile">
-              <div class="user-avatar" id="userAvatar">?</div>
-              <h3 class="user-name" id="userName">Loading...</h3>
-              <p class="peer-id" id="peerId">Generating peer ID...</p>
-              <button class="btn btn-outline" id="editProfileBtn">
-                Edit Profile
-              </button>
-            </div>
-            <h4>Your Listings</h4>
-            <div id="userListings">
-              <div class="loader"></div>
-            </div>
-          </div>
-          <div class="tab-panel" id="networkPanel">
-            <div class="form-group">
-              <label class="form-label">Connect to Peer</label>
-              <div style="display: flex; gap: 0.5rem;">
-                <input type="text" class="form-input" id="peerIdInput" placeholder="Enter peer ID">
-                <button class="btn btn-primary" id="connectBtn">Connect</button>
-              </div>
-            </div>
-            <h4>Connected Peers</h4>
-            <div id="connectedPeers">
-              No connections yet
-            </div>
-          </div>
-          <div class="tab-panel" id="dealsPanel">
-            <h4>Your Deals</h4>
-            <div id="userDeals">
-              <p>No deals yet</p>
-            </div>
-          </div>
-        </div>
+      <div class="tab" data-tab="peers">
+        <div class="tab-icon">👥</div>
+        <div>Peers</div>
       </div>
-      <div class="sidebar-overlay" id="sidebarOverlay"></div>
-      
-      <div class="board">
-        <div class="board-header">
-          <h2>Listings</h2>
-        </div>
-        <div class="board-filters">
-          <div class="filter-chip active" data-filter="all">All</div>
-          <div class="filter-chip" data-filter="goods">Goods</div>
-          <div class="filter-chip" data-filter="services">Services</div>
-          <div class="filter-chip" data-filter="housing">Housing</div>
-          <div class="filter-chip" data-filter="jobs">Jobs</div>
-        </div>
-        <div class="listings-grid" id="listingsGrid">
-          <div class="loader"></div>
-        </div>
+      <div class="tab" data-tab="profile">
+        <div class="tab-icon">👤</div>
+        <div>Profile</div>
       </div>
     </div>
   </div>
-
+  
   <!-- Create Listing Dialog -->
-  <div class="dialog-overlay" id="createListingDialog">
-    <div class="dialog">
+  <div class="dialog" id="create-listing-dialog">
+    <div class="dialog-content">
       <div class="dialog-header">
-        <h3 class="dialog-title">Create New Listing</h3>
-        <button class="dialog-close" id="closeCreateDialog">&times;</button>
+        <div class="dialog-title">Create New Listing</div>
+        <button class="dialog-close">&times;</button>
       </div>
-      <div class="dialog-content">
-        <form id="createListingForm">
+      <div class="dialog-body">
+        <form id="listing-form">
           <div class="form-group">
-            <label class="form-label" for="listingTitle">Title</label>
-            <input type="text" id="listingTitle" class="form-input" required>
+            <label for="listing-title">Title</label>
+            <input type="text" id="listing-title" class="form-control" required>
           </div>
+          
           <div class="form-group">
-            <label class="form-label" for="listingDescription">Description</label>
-            <textarea id="listingDescription" class="form-input" rows="4" required></textarea>
+            <label>Category</label>
+            <div class="categories-select">
+              <div class="category-option category-goods selected" data-category="goods">Goods</div>
+              <div class="category-option category-services" data-category="services">Services</div>
+              <div class="category-option category-housing" data-category="housing">Housing</div>
+              <div class="category-option category-jobs" data-category="jobs">Jobs</div>
+              <div class="category-option category-community" data-category="community">Community</div>
+            </div>
+            <input type="hidden" id="selected-category" value="goods">
           </div>
+          
           <div class="form-group">
-            <label class="form-label" for="listingPrice">Price</label>
-            <input type="number" id="listingPrice" class="form-input" min="0" step="0.01" required>
+            <label for="listing-description">Description</label>
+            <textarea id="listing-description" class="form-control" required></textarea>
           </div>
+          
           <div class="form-group">
-            <label class="form-label" for="listingCategory">Category</label>
-            <select id="listingCategory" class="form-input" required>
-              <option value="goods">Goods</option>
-              <option value="services">Services</option>
-              <option value="housing">Housing</option>
-              <option value="jobs">Jobs</option>
-            </select>
+            <label for="listing-price">Price</label>
+            <input type="text" id="listing-price" class="form-control" placeholder="$0.00" required>
           </div>
+          
           <div class="form-group">
-            <label class="form-label" for="listingTags">Tags (comma separated)</label>
-            <input type="text" id="listingTags" class="form-input" placeholder="e.g. used, electronics, local">
+            <label for="listing-contact">Contact Information</label>
+            <input type="text" id="listing-contact" class="form-control" placeholder="Email or phone number">
           </div>
         </form>
       </div>
-      <div class="dialog-footer">
-        <button class="btn btn-outline" id="cancelCreateListing">Cancel</button>
-        <button class="btn btn-primary" id="submitCreateListing">Create</button>
+      <div class="dialog-actions">
+        <button class="btn" id="cancel-listing-btn">Cancel</button>
+        <button class="btn" id="create-listing-submit">Create</button>
       </div>
     </div>
   </div>
-
-  <!-- View Listing Dialog -->
-  <div class="dialog-overlay" id="viewListingDialog">
-    <div class="dialog">
+  
+  <!-- Listing View Dialog -->
+  <div class="dialog" id="view-listing-dialog">
+    <div class="dialog-content">
       <div class="dialog-header">
-        <h3 class="dialog-title" id="viewListingTitle">Listing Title</h3>
-        <button class="dialog-close" id="closeViewDialog">&times;</button>
+        <div class="dialog-title" id="listing-view-title">Listing Details</div>
+        <button class="dialog-close">&times;</button>
       </div>
-      <div class="dialog-content">
-        <div id="viewListingContent">
-          <p id="viewListingDescription"></p>
-          <div class="form-group">
-            <label class="form-label">Price</label>
-            <p id="viewListingPrice"></p>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Category</label>
-            <p id="viewListingCategory"></p>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tags</label>
-            <div id="viewListingTags" class="listing-tags"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Posted by</label>
-            <p id="viewListingAuthor"></p>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Posted on</label>
-            <p id="viewListingDate"></p>
-          </div>
+      <div class="dialog-body">
+        <div id="listing-view-details">
+          <!-- Listing details populated by JS -->
         </div>
       </div>
-      <div class="dialog-footer">
-        <button class="btn btn-outline" id="closeViewDialogBtn">Close</button>
-        <button class="btn btn-primary" id="proposeBtn">Propose Deal</button>
+      <div class="dialog-actions">
+        <button class="btn" id="close-listing-view">Close</button>
+        <button class="btn" id="propose-deal-btn">Propose Deal</button>
       </div>
     </div>
   </div>
-
-  <!-- Deal Dialog -->
-  <div class="dialog-overlay" id="dealDialog">
-    <div class="dialog">
+  
+  <!-- Propose Deal Dialog -->
+  <div class="dialog" id="propose-deal-dialog">
+    <div class="dialog-content">
       <div class="dialog-header">
-        <h3 class="dialog-title">Propose Deal</h3>
-        <button class="dialog-close" id="closeDealDialog">&times;</button>
+        <div class="dialog-title">Propose a Deal</div>
+        <button class="dialog-close">&times;</button>
       </div>
-      <div class="dialog-content">
-        <form id="dealProposalForm">
+      <div class="dialog-body">
+        <form id="deal-form">
           <div class="form-group">
-            <label class="form-label">Listing</label>
-            <p id="dealListingTitle"></p>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="dealMessage">Message</label>
-            <textarea id="dealMessage" class="form-input" rows="4" required placeholder="Enter details of your proposal..."></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="dealOfferAmount">Offer Amount</label>
-            <input type="number" id="dealOfferAmount" class="form-input" min="0" step="0.01">
+            <label for="deal-terms">Terms</label>
+            <textarea id="deal-terms" class="form-control" placeholder="Describe your offer, conditions, or any specific details..." required></textarea>
           </div>
         </form>
       </div>
-      <div class="dialog-footer">
-        <button class="btn btn-outline" id="cancelDeal">Cancel</button>
-        <button class="btn btn-primary" id="submitDeal">Send Proposal</button>
+      <div class="dialog-actions">
+        <button class="btn" id="cancel-deal-btn">Cancel</button>
+        <button class="btn" id="send-deal-btn">Send Proposal</button>
       </div>
     </div>
   </div>
-
-  <!-- Edit Profile Dialog -->
-  <div class="dialog-overlay" id="profileDialog">
-    <div class="dialog">
-      <div class="dialog-header">
-        <h3 class="dialog-title">Edit Profile</h3>
-        <button class="dialog-close" id="closeProfileDialog">&times;</button>
-      </div>
-      <div class="dialog-content">
-        <form id="profileForm">
-          <div class="form-group">
-            <label class="form-label" for="userNameInput">Display Name</label>
-            <input type="text" id="userNameInput" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="userBioInput">Bio</label>
-            <textarea id="userBioInput" class="form-input" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="userEmailInput">Contact Email</label>
-            <input type="email" id="userEmailInput" class="form-input">
-          </div>
-        </form>
-      </div>
-      <div class="dialog-footer">
-        <button class="btn btn-outline" id="cancelProfile">Cancel</button>
-        <button class="btn btn-primary" id="saveProfile">Save Profile</button>
-      </div>
-    </div>
-  </div>
-
+  
   <!-- Deal View Dialog -->
-  <div class="dialog-overlay" id="dealViewDialog" data-deal-id="">
-    <div class="dialog">
+  <div class="dialog" id="view-deal-dialog">
+    <div class="dialog-content">
       <div class="dialog-header">
-        <h3 class="dialog-title" id="dealViewTitle">Deal Details</h3>
-        <button class="dialog-close" id="closeDealViewDialog">&times;</button>
+        <div class="dialog-title">Deal Details</div>
+        <button class="dialog-close">&times;</button>
       </div>
-      <div class="dialog-content">
+      <div class="dialog-body">
         <div class="deal-view-details">
           <div class="deal-status-bar">
-            <span class="peer-badge" id="dealViewStatus">Pending</span>
-            <span class="deal-date" id="dealViewDate"></span>
+            <span id="deal-status" class="badge">Status</span>
+            <span id="deal-date" class="deal-date">Date</span>
           </div>
-          
-          <div class="form-group">
-            <label class="form-label">Deal Partner</label>
-            <p id="dealViewParty"></p>
+          <div id="deal-terms" class="deal-message">
+            No terms specified
           </div>
-          
-          <div class="form-group">
-            <label class="form-label">Message</label>
-            <p id="dealViewMessage" class="deal-message"></p>
+          <div class="deal-offer">
+            <span id="deal-offer-text">Offer: $0.00</span>
           </div>
-          
-          <div class="form-group">
-            <label class="form-label">Offer Amount</label>
-            <p id="dealViewOffer" class="deal-offer"></p>
-          </div>
-          
-          <div class="deal-actions" id="dealViewActions">
-            <!-- Buttons will be added dynamically -->
+          <div class="deal-actions">
+            <button id="accept-deal-btn" class="btn hidden">Accept</button>
+            <button id="decline-deal-btn" class="btn hidden">Decline</button>
+            <button id="complete-deal-btn" class="btn hidden">Mark Complete</button>
+            <button id="cancel-deal-btn" class="btn hidden">Cancel Deal</button>
           </div>
         </div>
         
-        <div class="deal-comments">
-          <h4>Comments</h4>
-          <div id="dealComments" class="comments-list">
-            <p class="text-center">Loading comments...</p>
+        <!-- Comments Section -->
+        <div>
+          <h3>Comments</h3>
+          <div id="comments-list" class="comments-list">
+            <div class="comment">No comments yet</div>
           </div>
-          
           <div class="comment-form">
-            <textarea id="commentText" class="form-input" rows="2" placeholder="Write a comment..."></textarea>
-            <button id="submitComment" class="btn btn-primary">Send</button>
+            <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+            <button id="send-comment-btn" class="btn">Send</button>
           </div>
         </div>
       </div>
     </div>
   </div>
-
+  
+  <!-- Connect Peer Dialog -->
+  <div class="dialog" id="connect-peer-dialog">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <div class="dialog-title">Connect to Peer</div>
+        <button class="dialog-close">&times;</button>
+      </div>
+      <div class="dialog-body">
+        <div class="form-group">
+          <label for="peer-id-input">Peer ID</label>
+          <input type="text" id="peer-id-input" class="form-control" placeholder="Enter peer ID to connect...">
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" id="cancel-connect-btn">Cancel</button>
+        <button class="btn" id="connect-peer-btn">Connect</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Profile Edit Dialog -->
+  <div class="dialog" id="profile-edit-dialog">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <div class="dialog-title">Edit Profile</div>
+        <button class="dialog-close">&times;</button>
+      </div>
+      <div class="dialog-body">
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="profile-name">Name</label>
+            <input type="text" id="profile-name" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="profile-bio">Bio</label>
+            <textarea id="profile-bio" class="form-control"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" id="cancel-profile-edit">Cancel</button>
+        <button class="btn" id="save-profile">Save</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
-
-  <!-- Include our JavaScript modules -->
+  <div class="toast-container" id="toast-container"></div>
+  
+  <!-- Include modular JavaScript -->
+  <script src="js/dataStore.js"></script>
   <script src="js/mobileDb.js"></script>
   <script src="js/mobilePeerService.js"></script>
   <script src="js/mobileUiUtils.js"></script>
   <script src="js/mobileListingManager.js"></script>
   <script src="js/mobileApp.js"></script>
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
 </body>
 </html>

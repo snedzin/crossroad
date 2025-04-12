@@ -1,3 +1,4 @@
+
 // Data storage and manipulation functions
 
 // Get all listings (local + external)
@@ -99,6 +100,26 @@ function hasDeal(id) {
   const localHas = deals.some(deal => deal.id === id);
   const externalHas = externalDealsMap.has(id);
   return localHas || externalHas;
+}
+
+// Get all comments for a deal
+function getCommentsForDeal(dealId) {
+  const comments = JSON.parse(localStorage.getItem('crossroadComments') || '[]');
+  return comments.filter(comment => comment.dealId === dealId);
+}
+
+// Add a comment to a deal
+function addCommentToDeal(comment) {
+  const comments = JSON.parse(localStorage.getItem('crossroadComments') || '[]');
+  comments.push(comment);
+  localStorage.setItem('crossroadComments', JSON.stringify(comments));
+  
+  // Also broadcast the comment
+  if (window.p2pService) {
+    window.p2pService.broadcastComment(comment);
+  }
+  
+  return comment;
 }
 
 // Format timestamp for display

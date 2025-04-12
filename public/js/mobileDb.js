@@ -1,3 +1,4 @@
+
 // IndexedDB database operations
 const DB_VERSION = 1;
 const DB_NAME = "peerBoardDB";
@@ -146,6 +147,43 @@ async function getListingById(id) {
     const transaction = db.transaction(['listings'], 'readonly');
     const store = transaction.objectStore('listings');
     const request = store.get(id);
+    
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Get a deal by ID
+async function getDealById(id) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['deals'], 'readonly');
+    const store = transaction.objectStore('deals');
+    const request = store.get(id);
+    
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Save a comment
+async function saveComment(comment) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['comments'], 'readwrite');
+    const store = transaction.objectStore('comments');
+    const request = store.put(comment);
+    
+    request.onsuccess = () => resolve(comment);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Get all comments for a deal
+async function getDealComments(dealId) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['comments'], 'readonly');
+    const store = transaction.objectStore('comments');
+    const index = store.index('dealId');
+    const request = index.getAll(dealId);
     
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);

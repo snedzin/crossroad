@@ -1,4 +1,3 @@
-
 import Peer, { DataConnection } from "peerjs";
 import { 
   P2PMessage, 
@@ -37,8 +36,8 @@ export class PeerService {
         // Use custom peer ID if provided, otherwise generate one
         this.peerId = customPeerId || `p2p-board-${generateId()}`;
         
-        // Fix: Create a new Peer instance without passing options
-        this.peer = new Peer(this.peerId);
+        // Create a new Peer instance
+        this.peer = new Peer();
         
         this.peer.on('open', (id) => {
           console.log('My peer ID is: ' + id);
@@ -55,8 +54,8 @@ export class PeerService {
             const newPeerId = `${customPeerId}-${generateId(4)}`;
             this.peerId = newPeerId;
             
-            // Fix: Create a new Peer instance without passing options
-            this.peer = new Peer(newPeerId);
+            // Create a new Peer instance
+            this.peer = new Peer();
             
             this.peer.on('open', (id) => {
               console.log('New peer ID is: ' + id);

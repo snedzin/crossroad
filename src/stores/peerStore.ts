@@ -13,6 +13,7 @@ interface PeerState {
   connectToPeer: (peerId: string) => Promise<boolean>;
   disconnectFromPeer: (peerId: string) => void;
   updatePeerStatus: (peerId: string, status: PeerConnectionStatus) => void;
+  resetPeerConnection: (newPeerId?: string) => Promise<string>;
 }
 
 export const usePeerStore = create<PeerState>((set, get) => ({
@@ -32,10 +33,13 @@ export const usePeerStore = create<PeerState>((set, get) => ({
         throw new Error("No user profile found");
       }
       
-      const peerId = await peerService.initialize(currentUser.id);
+      // Use username-based peer ID if user has one
+      const peerId = await peerService.initialize(currentUser.id, currentUser.peerId);
       
-      // Update the user profile with the peer ID
-      await useUserStore.getState().updateUserProfile({ peerId });
+      // Update the user profile with the peer ID if it changed
+      if (currentUser.peerId !== peerId) {
+        await useUserStore.getState().updateUserProfile({ peerId });
+      }
       
       // Set up connection listener
       peerService.addConnectionListener((peerId, status) => {
@@ -51,6 +55,44 @@ export const usePeerStore = create<PeerState>((set, get) => ({
       return peerId;
     } catch (error) {
       console.error("Failed to initialize peer:", error);
+      set({ 
+        connectionStatus: PeerConnectionStatus.ERROR,
+        isInitializing: false 
+      });
+      throw error;
+    }
+  },
+
+  // Reset and reinitialize peer connection with a new ID
+  resetPeerConnection: async (newPeerId) => {
+    set({ isInitializing: true });
+    
+    try {
+      // First destroy the existing connection
+      peerService.destroy();
+      
+      const currentUser = useUserStore.getState().currentUser;
+      
+      if (!currentUser) {
+        throw new Error("No user profile found");
+      }
+      
+      // Initialize with the new peer ID
+      const peerId = await peerService.initialize(currentUser.id, newPeerId);
+      
+      // Update the user profile with the new peer ID
+      await useUserStore.getState().updateUserProfile({ peerId });
+      
+      set({ 
+        myPeerId: peerId, 
+        connectedPeers: new Map(),
+        connectionStatus: PeerConnectionStatus.CONNECTED,
+        isInitializing: false 
+      });
+      
+      return peerId;
+    } catch (error) {
+      console.error("Failed to reset peer connection:", error);
       set({ 
         connectionStatus: PeerConnectionStatus.ERROR,
         isInitializing: false 

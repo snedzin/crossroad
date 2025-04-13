@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -761,7 +760,7 @@
     </div>
   </div>
   
-  <!-- Profile Edit Dialog -->
+  <!-- Profile Edit Dialog with Avatar Selection -->
   <div class="dialog" id="profile-edit-dialog">
     <div class="dialog-content">
       <div class="dialog-header">
@@ -770,14 +769,47 @@
       </div>
       <div class="dialog-body">
         <form id="profile-form">
+          <div class="user-avatar-container">
+            <div class="user-avatar" id="current-avatar">
+              <img src="placeholder.svg" alt="User Avatar" id="avatar-preview">
+            </div>
+          </div>
+          
+          <div class="avatar-selector">
+            <div class="avatar-option selected" data-avatar="placeholder.svg">
+              <img src="placeholder.svg" alt="Default Avatar">
+            </div>
+            <div class="avatar-option" data-avatar="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop">
+              <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop" alt="Avatar 1">
+            </div>
+            <div class="avatar-option" data-avatar="https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop">
+              <img src="https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop" alt="Avatar 2">
+            </div>
+            <div class="avatar-option" data-avatar="https://images.unsplash.com/photo-1482562124811-c09040d0a901?w=150&h=150&fit=crop">
+              <img src="https://images.unsplash.com/photo-1482562124811-c09040d0a901?w=150&h=150&fit=crop" alt="Avatar 3">
+            </div>
+          </div>
+          
           <div class="form-group">
-            <label for="profile-name">Name</label>
+            <label for="profile-name">Username</label>
             <input type="text" id="profile-name" class="form-control" required>
           </div>
           
           <div class="form-group">
             <label for="profile-bio">Bio</label>
             <textarea id="profile-bio" class="form-control"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <div class="peer-connection-controls">
+              <label>Peer Connection</label>
+              <div class="peer-status-info">
+                <span id="peer-status-indicator" class="connection-indicator"></span>
+                <span id="peer-status-text">Not connected</span>
+              </div>
+              <div id="peer-id-display" class="peer-id-display"></div>
+              <button type="button" id="reset-peer-id" class="btn">Reset Peer ID (Based on Username)</button>
+            </div>
           </div>
         </form>
       </div>

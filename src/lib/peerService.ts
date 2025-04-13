@@ -29,11 +29,13 @@ export class PeerService {
   private connectionListeners: ((peerId: string, status: PeerConnectionStatus) => void)[] = [];
 
   // Initialize the peer service
-  async initialize(userId: string): Promise<string> {
+  async initialize(userId: string, customPeerId?: string): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
         this.userId = userId;
-        this.peerId = `p2p-board-${generateId()}`;
+        
+        // Use custom peer ID if provided, otherwise generate one
+        this.peerId = customPeerId || `p2p-board-${generateId()}`;
         
         this.peer = new Peer(this.peerId);
         
@@ -45,7 +47,27 @@ export class PeerService {
         
         this.peer.on('error', (err) => {
           console.error('Peer error:', err);
-          reject(err);
+          
+          // If the ID is already taken, try again with a different ID
+          if (err.type === 'unavailable-id' && customPeerId) {
+            console.log('Peer ID already taken, generating a new one');
+            const newPeerId = `${customPeerId}-${generateId(4)}`;
+            this.peerId = newPeerId;
+            this.peer = new Peer(newPeerId);
+            
+            this.peer.on('open', (id) => {
+              console.log('New peer ID is: ' + id);
+              this.setupPeerEvents();
+              resolve(id);
+            });
+            
+            this.peer.on('error', (newErr) => {
+              console.error('Second peer error:', newErr);
+              reject(newErr);
+            });
+          } else {
+            reject(err);
+          }
         });
       } catch (error) {
         reject(error);

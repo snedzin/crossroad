@@ -56,6 +56,17 @@
       </div>
       
       <div class="p2p-tab-content" id="connections-tab">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar">
+            <img src="placeholder.svg" alt="User Avatar" id="avatar-image">
+          </div>
+          <div class="user-info">
+            <h3 id="user-name">Anonymous</h3>
+            <p id="user-bio" class="user-bio">No bio provided</p>
+            <button id="edit-profile-btn" class="edit-button">Edit Profile</button>
+          </div>
+        </div>
+        
         <div class="peer-status">
           <div id="status-indicator" class="status-indicator status-disconnected"></div>
           <div>
@@ -162,6 +173,60 @@
           <textarea id="comment-input" placeholder="Add a comment..."></textarea>
           <button id="send-comment-btn">Send</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal" id="user-profile-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Edit Your Profile</h2>
+        <button class="close-button" id="close-profile-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-avatar-section">
+          <div class="current-avatar">
+            <img src="placeholder.svg" alt="Current Avatar" id="profile-avatar-preview">
+          </div>
+          <div class="avatar-options">
+            <div class="avatar-option selected" data-avatar="placeholder.svg">
+              <img src="placeholder.svg" alt="Default Avatar">
+            </div>
+            <div class="avatar-option" data-avatar="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop">
+              <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop" alt="Avatar 1">
+            </div>
+            <div class="avatar-option" data-avatar="https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop">
+              <img src="https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop" alt="Avatar 2">
+            </div>
+            <div class="avatar-option" data-avatar="https://images.unsplash.com/photo-1482562124811-c09040d0a901?w=150&h=150&fit=crop">
+              <img src="https://images.unsplash.com/photo-1482562124811-c09040d0a901?w=150&h=150&fit=crop" alt="Avatar 3">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="profile-username">Username</label>
+          <input type="text" id="profile-username" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="profile-bio">Bio</label>
+          <textarea id="profile-bio"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Peer Connection</label>
+          <div class="peer-connection-info">
+            <div id="profile-peer-status" class="peer-status-indicator"></div>
+            <span id="profile-peer-status-text">Not connected</span>
+          </div>
+          <div id="profile-peer-id" class="profile-peer-id"></div>
+          <button id="reset-peer-id-btn" class="reset-button">Reset Peer ID (Based on Username)</button>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button id="save-profile-btn">Save Profile</button>
       </div>
     </div>
   </div>

@@ -1,11 +1,11 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { useUserStore } from "@/stores/userStore";
 import { usePeerStore } from "@/stores/peerStore";
@@ -16,22 +16,40 @@ interface UserProfileDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const USER_AVATARS = [
+  '/placeholder.svg',
+  'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
+  'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop',
+  'https://images.unsplash.com/photo-1482562124811-c09040d0a901?w=150&h=150&fit=crop',
+];
+
 const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
   const { currentUser, updateUserProfile } = useUserStore();
-  const { myPeerId, initializePeer, isInitializing } = usePeerStore();
+  const { myPeerId, initializePeer, isInitializing, resetPeerConnection } = usePeerStore();
   const { toast } = useToast();
   
-  const [name, setName] = React.useState(currentUser?.name || "");
-  const [bio, setBio] = React.useState(currentUser?.bio || "");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [name, setName] = useState(currentUser?.name || "");
+  const [bio, setBio] = useState(currentUser?.bio || "");
+  const [avatar, setAvatar] = useState(currentUser?.avatar || USER_AVATARS[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmReset, setShowConfirmReset] = useState(false);
   
   // Update form when currentUser changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentUser) {
       setName(currentUser.name || "");
       setBio(currentUser.bio || "");
+      setAvatar(currentUser.avatar || USER_AVATARS[0]);
     }
   }, [currentUser]);
+  
+  const generatePeerIdFromUsername = (username: string) => {
+    // Remove special characters and spaces
+    const sanitized = username.replace(/[^\w]/g, '').toLowerCase();
+    // Add a random suffix to avoid collisions
+    const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `peer-${sanitized}-${randomSuffix}`;
+  };
   
   const handleInitializePeer = async () => {
     try {
@@ -46,6 +64,40 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
       toast({
         title: "Connection Error",
         description: "Failed to connect to the P2P network. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleResetPeerConnection = async () => {
+    if (!showConfirmReset) {
+      setShowConfirmReset(true);
+      return;
+    }
+    
+    try {
+      // First update user profile to generate new peerId
+      const updatedUser = await updateUserProfile({ 
+        name, 
+        bio, 
+        avatar,
+        peerId: generatePeerIdFromUsername(name)
+      });
+      
+      // Then reset the peer connection
+      await resetPeerConnection(updatedUser.peerId);
+      
+      toast({
+        title: "Peer Connection Reset",
+        description: "Your peer connection has been reset with a new ID based on your username.",
+      });
+      
+      setShowConfirmReset(false);
+    } catch (error) {
+      console.error("Failed to reset peer connection:", error);
+      toast({
+        title: "Reset Error",
+        description: "Failed to reset peer connection. Please try again.",
         variant: "destructive",
       });
     }
@@ -66,7 +118,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
     setIsSubmitting(true);
     
     try {
-      await updateUserProfile({ name, bio });
+      await updateUserProfile({ name, bio, avatar });
       
       toast({
         title: "Profile Updated",
@@ -88,19 +140,20 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-board-card text-gray-800 max-w-md">
+      <DialogContent className="bg-background text-foreground max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Your Profile</DialogTitle>
         </DialogHeader>
         
         <div className="flex items-center space-x-4 mb-4">
-          <Avatar className="h-16 w-16 text-xl bg-board-secondary">
-            <span>{getInitials(name || "Anonymous")}</span>
+          <Avatar className="h-16 w-16 text-xl bg-muted">
+            <AvatarImage src={avatar} alt={name || "User"} />
+            <AvatarFallback>{getInitials(name || "Anonymous")}</AvatarFallback>
           </Avatar>
           
           <div>
             <h3 className="font-semibold text-lg">{name || "Anonymous User"}</h3>
-            <p className="text-sm text-gray-500">ID: {currentUser?.id || "Not set"}</p>
+            <p className="text-sm text-muted-foreground">ID: {currentUser?.id || "Not set"}</p>
           </div>
         </div>
         
@@ -112,7 +165,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
                 onClick={handleInitializePeer}
                 disabled={isInitializing}
                 size="sm"
-                className="bg-board-primary hover:bg-indigo-600 text-xs"
+                className="bg-primary hover:bg-primary/90 text-xs"
               >
                 {isInitializing ? "Connecting..." : "Connect"}
               </Button>
@@ -123,14 +176,22 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
             <div className="mt-1">
               <div className="flex items-center">
                 <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                <p className="text-sm text-gray-600">Connected</p>
+                <p className="text-sm text-muted-foreground">Connected</p>
               </div>
-              <code className="block mt-1 text-xs bg-gray-100 p-1 rounded overflow-hidden overflow-ellipsis">
+              <code className="block mt-1 text-xs bg-muted p-1 rounded overflow-hidden overflow-ellipsis">
                 {myPeerId}
               </code>
+              <Button
+                onClick={handleResetPeerConnection}
+                variant="outline"
+                size="sm"
+                className="mt-2 text-xs"
+              >
+                {showConfirmReset ? "Confirm Reset" : "Reset Peer ID (Based on Username)"}
+              </Button>
             </div>
           ) : (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {isInitializing ? "Connecting to P2P network..." : "Not connected to P2P network"}
             </p>
           )}
@@ -159,6 +220,22 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
             />
           </div>
           
+          <div className="space-y-2">
+            <Label>Avatar</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {USER_AVATARS.map((src, index) => (
+                <Avatar 
+                  key={index}
+                  className={`cursor-pointer h-14 w-14 ${avatar === src ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'}`}
+                  onClick={() => setAvatar(src)}
+                >
+                  <AvatarImage src={src} alt={`Avatar option ${index + 1}`} />
+                  <AvatarFallback>{index + 1}</AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          </div>
+          
           <DialogFooter className="pt-2">
             <Button
               type="button"
@@ -171,7 +248,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
             <Button 
               type="submit" 
               disabled={isSubmitting} 
-              className="bg-board-primary hover:bg-indigo-600"
+              className="bg-primary hover:bg-primary/90"
             >
               {isSubmitting ? "Saving..." : "Save Profile"}
             </Button>

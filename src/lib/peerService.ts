@@ -37,6 +37,7 @@ export class PeerService {
         // Use custom peer ID if provided, otherwise generate one
         this.peerId = customPeerId || `p2p-board-${generateId()}`;
         
+        // Fix: Create a new Peer instance without passing options
         this.peer = new Peer(this.peerId);
         
         this.peer.on('open', (id) => {
@@ -53,6 +54,8 @@ export class PeerService {
             console.log('Peer ID already taken, generating a new one');
             const newPeerId = `${customPeerId}-${generateId(4)}`;
             this.peerId = newPeerId;
+            
+            // Fix: Create a new Peer instance without passing options
             this.peer = new Peer(newPeerId);
             
             this.peer.on('open', (id) => {

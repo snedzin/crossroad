@@ -1,3 +1,4 @@
+
 import Peer, { DataConnection } from "peerjs";
 import { 
   P2PMessage, 
@@ -54,7 +55,7 @@ export class PeerService {
             const newPeerId = `${customPeerId}-${generateId(4)}`;
             this.peerId = newPeerId;
             
-            // Create a new Peer instance
+            // Create a new Peer instance without passing an argument
             this.peer = new Peer();
             
             this.peer.on('open', (id) => {

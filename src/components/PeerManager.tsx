@@ -1,5 +1,4 @@
-
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { peerService } from "@/lib/peerService";
 import { usePeerStore } from "@/stores/peerStore";
@@ -17,16 +16,14 @@ import {
   PeerListMessage,
 } from "@/lib/types";
 
-// Hidden component that manages P2P connections and message handling
 const PeerManager = () => {
   const { toast } = useToast();
   const { currentUser, addOrUpdateUser } = useUserStore();
   const { listings, addExternalListing } = useListingStore();
   const { deals, addExternalDeal, addExternalMessage } = useDealStore();
   
-  // Set up message handlers when the component mounts
   useEffect(() => {
-    // Handle hello messages
+    // Hello message handler
     peerService.addMessageHandler<HelloMessage>(MessageType.HELLO, (message, connection) => {
       console.log("Received hello from:", message.senderId);
       
@@ -153,7 +150,7 @@ const PeerManager = () => {
     };
   }, [toast, addOrUpdateUser, addExternalListing, addExternalDeal, addExternalMessage, currentUser, listings, deals]);
   
-  return null; // This component doesn't render anything
+  return null;
 };
 
 export default PeerManager;

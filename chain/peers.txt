@@ -1,0 +1,8 @@
+
+# Crossroad Peer List
+# One peer ID per line, empty lines and lines starting with # are ignored
+
+# Example peers (these won't work in production):
+# crossroad-alice
+# crossroad-bob
+# crossroad-charlie

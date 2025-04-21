@@ -195,11 +195,17 @@ export class PeerService {
   }
 
   // Add a message handler
-  addMessageHandler<T extends P2PMessage>(type: MessageType, handler: (message: T, connection: DataConnection) => void): void {
+  addMessageHandler<T extends P2PMessage>(
+    type: MessageType, 
+    handler: (message: T, connection: DataConnection) => void
+  ): void {
     if (!this.messageHandlers.has(type)) {
       this.messageHandlers.set(type, []);
     }
-    this.messageHandlers.get(type)?.push(handler as any);
+    const handlers = this.messageHandlers.get(type);
+    if (handlers) {
+      handlers.push(handler as any);
+    }
   }
 
   // Remove a message handler
